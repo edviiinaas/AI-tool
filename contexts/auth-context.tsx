@@ -103,6 +103,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || "",
+      user_metadata: {
+        full_name: supabaseUser.user_metadata?.full_name,
+        avatar_url: supabaseUser.user_metadata?.avatar_url,
+        email: supabaseUser.email || "",
+      },
       fullName: supabaseUser.user_metadata?.full_name,
       companyName: supabaseUser.user_metadata?.company_name,
       plan: supabaseUser.user_metadata?.plan || "starter",
