@@ -151,7 +151,7 @@ export function GlobalSearchDialog({ open, onOpenChange }: GlobalSearchDialogPro
               onSelect={() => runCommand(() => router.push(`/app/agents?agentId=${agent.id}`))}
               className="cursor-pointer"
             >
-              <agent.avatar className="mr-2 h-4 w-4" style={{ color: agent.themeColor }} />
+              <agent.icon className="mr-2 h-4 w-4" style={{ color: agent.color }} />
               <span>{agent.name}</span>
               <span className="text-xs text-muted-foreground ml-2 truncate">{agent.description}</span>
             </CommandItem>
