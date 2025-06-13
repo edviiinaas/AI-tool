@@ -193,7 +193,7 @@ export function ApiKeysSettingsForm() {
               Please copy your new API key. You will not be able to see it again after closing this dialog.
             </DialogDescription>
           </DialogHeader>
-          <Alert variant="warning" className="my-4">
+          <Alert variant="default" className="my-4">
             <KeyRound className="h-4 w-4" />
             <AlertTitle>Important!</AlertTitle>
             <AlertDescription>Store this key securely. It will not be shown again.</AlertDescription>
