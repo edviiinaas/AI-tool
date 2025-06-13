@@ -100,8 +100,8 @@ export default function OnboardingWizard() {
   ]
 
   return (
-    <Card className="w-full max-w-2xl shadow-2xl">
-      <CardHeader className="text-center">
+    <Card className="w-full max-w-2xl shadow-2xl mx-auto px-1 sm:px-4">
+      <CardHeader className="text-center pb-2 pt-4 sm:pt-8">
         <div className="mx-auto mb-4 text-primary">
           {/* Placeholder for a logo or icon */}
           <svg
@@ -118,28 +118,28 @@ export default function OnboardingWizard() {
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
           </svg>
         </div>
-        <CardTitle className="text-2xl font-semibold">{stepTitles[currentStep - 1]}</CardTitle>
-        <Progress value={progressPercentage} className="mt-4 w-3/4 mx-auto" />
-        <p className="text-sm text-muted-foreground mt-2">
+        <CardTitle className="text-lg sm:text-2xl font-semibold">{stepTitles[currentStep - 1]}</CardTitle>
+        <Progress value={progressPercentage} className="mt-4 w-full sm:w-3/4 mx-auto" />
+        <p className="text-xs sm:text-sm text-muted-foreground mt-2">
           Step {currentStep} of {totalSteps}
         </p>
       </CardHeader>
-      <CardContent className="min-h-[300px] flex flex-col justify-center">
+      <CardContent className="min-h-[220px] sm:min-h-[300px] flex flex-col justify-center px-1 sm:px-6">
         {currentStep === 1 && <WelcomeStep data={onboardingData} updateData={updateOnboardingData} />}
         {currentStep === 2 && <AgentSelectionStep data={onboardingData} updateData={updateOnboardingData} />}
         {currentStep === 3 && <DocumentUploadStep data={onboardingData} updateData={updateOnboardingData} />}
         {currentStep === 4 && <FirstMessageStep onComplete={handleFirstMessageComplete} />}
         {currentStep === 5 && <InviteTeamStep onComplete={handleTeamInviteComplete} />}
       </CardContent>
-      <CardFooter className="flex justify-between border-t pt-6">
-        <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
+      <CardFooter className="flex flex-col sm:flex-row justify-between border-t pt-4 gap-2 sm:gap-0">
+        <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting} className="w-full sm:w-auto">
           <ChevronLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => router.push('/app/dashboard')} disabled={isSubmitting}>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="ghost" onClick={() => router.push('/app/dashboard')} disabled={isSubmitting} className="w-full sm:w-auto">
             Skip
           </Button>
-          <Button onClick={handleNext} className="bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isSubmitting}>
+          <Button onClick={handleNext} className="bg-accent hover:bg-accent/90 text-accent-foreground w-full sm:w-auto" disabled={isSubmitting}>
             {isSubmitting ? (
               <span className="flex items-center"><svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Processing...</span>
             ) : currentStep === totalSteps ? (

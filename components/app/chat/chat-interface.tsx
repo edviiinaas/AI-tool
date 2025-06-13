@@ -11,8 +11,10 @@ import { Send, Loader2, Pencil, Trash2, Smile, Paperclip } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Database } from "@/types/supabase"
-import { Picker } from 'emoji-mart/react'
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
 import 'emoji-mart/css/emoji-mart.css'
+import { useTheme } from "next-themes"
 
 interface Message {
   id: string
@@ -51,6 +53,8 @@ export function ChatInterface() {
   const MESSAGES_PER_PAGE = 50
   const [reactionsByMessage, setReactionsByMessage] = useState<Record<string, string[]>>({})
   const [lastReadAt, setLastReadAt] = useState<string | null>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const { theme } = useTheme()
 
   useEffect(() => {
     fetchMessages()
@@ -263,18 +267,18 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col">
+    <div className="flex h-[calc(100vh-4rem)] flex-col max-w-full">
       {/* Search bar */}
-      <div className="p-4 border-b bg-background">
+      <div className="p-2 sm:p-4 border-b bg-background">
         <Input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search messages..."
-          className="w-full"
+          className="w-full text-sm sm:text-base"
         />
       </div>
-      <ScrollArea ref={scrollRef} className="flex-1 p-4" onScroll={handleScroll}>
-        <div className="space-y-4">
+      <ScrollArea ref={scrollRef} className="flex-1 p-2 sm:p-4 max-w-full" onScroll={handleScroll}>
+        <div className="space-y-3 sm:space-y-4">
           {isLoadingMore && (
             <div className="flex justify-center py-2">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -283,16 +287,16 @@ export function ChatInterface() {
           {filteredMessages.map((message) => {
             const isCurrentUser = message.user_id === user?.id
             const messageReactions = reactionsByMessage[message.id] || []
-            const isUnread = message.created_at > lastReadAt
+            const isUnread = lastReadAt ? new Date(message.created_at) > new Date(lastReadAt) : true
             return (
               <div
                 key={message.id}
                 className={cn(
-                  "group flex items-start gap-2",
+                  "group flex items-start gap-2 sm:gap-3",
                   isCurrentUser && "flex-row-reverse"
                 )}
               >
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 min-w-8">
                   <AvatarImage src={message.user.avatar_url} />
                   <AvatarFallback>
                     {message.user.full_name.charAt(0).toUpperCase()}
@@ -300,7 +304,7 @@ export function ChatInterface() {
                 </Avatar>
                 <div
                   className={cn(
-                    "relative rounded-lg px-4 py-2 max-w-[80%]",
+                    "relative rounded-lg px-3 py-2 sm:px-4 sm:py-2 max-w-[85vw] sm:max-w-[80%]",
                     isCurrentUser
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted"
@@ -405,23 +409,33 @@ export function ChatInterface() {
           )}
         </div>
       </ScrollArea>
-      <form onSubmit={sendMessage} className="border-t p-4 relative">
+      <form onSubmit={sendMessage} className="border-t p-2 sm:p-4 relative bg-background">
         <div className="flex gap-2 items-center">
-          <Button type="button" variant="ghost" size="icon">
-            <Paperclip className="h-4 w-4" />
-          </Button>
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              className="hidden"
+              onChange={e => setFile(e.target.files?.[0] || null)}
+              disabled={isLoading}
+            />
+            <Paperclip className="h-5 w-5 sm:h-4 sm:w-4" />
+          </label>
           <div className="relative">
             <Button type="button" variant="ghost" size="icon" onClick={() => setShowEmojiPicker((v) => !v)}>
-              <Smile className="h-4 w-4" />
+              <Smile className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
             {showEmojiPicker && (
-              <div className="absolute bottom-10 left-0 z-50">
+              <div className="absolute bottom-full right-0 mb-2">
                 <Picker
+                  data={data}
                   onEmojiSelect={(emoji: any) => {
-                    setNewMessage((msg) => msg + (emoji.native || emoji.skins?.[0]?.native || ""))
+                    setNewMessage((prev) => prev + emoji.native)
                     setShowEmojiPicker(false)
                   }}
-                  theme="light"
+                  theme={theme === 'dark' ? 'dark' : 'light'}
+                  set="native"
+                  previewPosition="none"
+                  skinTonePosition="none"
                 />
               </div>
             )}
@@ -431,15 +445,18 @@ export function ChatInterface() {
             onChange={handleInput}
             placeholder="Type a message..."
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 text-sm sm:text-base"
           />
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} size="lg" className="px-4 h-10 sm:h-11">
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             )}
           </Button>
+          {file && (
+            <span className="ml-2 text-xs text-muted-foreground truncate max-w-[80px]">{file.name}</span>
+          )}
         </div>
       </form>
     </div>

@@ -55,23 +55,23 @@ export default function DashboardPageClient() {
   }, [user])
 
   return (
-    <div data-tour="dashboard" ref={mainRef} className="space-y-6 px-2 sm:px-4 md:px-8 max-w-7xl mx-auto">
+    <div data-tour="dashboard" ref={mainRef} className="space-y-4 px-1 sm:px-4 md:px-8 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 pt-4 pb-2">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary dark:text-primary-foreground/90 mb-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary dark:text-primary-foreground/90 mb-1">
             Welcome back, {user?.fullName?.split(" ")[0] || "User"}!
           </h1>
           <p className="text-muted-foreground text-sm">Here's an overview of your AIConstruct workspace.</p>
         </div>
-        <div className="flex gap-2 mt-2 sm:mt-0">
-          <Button variant="default" size="sm" className="gap-1"><Plus className="h-4 w-4" /> New Project</Button>
-          <Button variant="outline" size="sm" className="gap-1"><UploadCloud className="h-4 w-4" /> Upload Doc</Button>
-          <Button variant="outline" size="sm" className="gap-1"><UserPlus className="h-4 w-4" /> Invite</Button>
+        <div className="flex flex-wrap gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
+          <Button variant="default" size="lg" className="gap-1 flex-1 min-w-[120px]"> <Plus className="h-4 w-4" /> New Project</Button>
+          <Button variant="outline" size="lg" className="gap-1 flex-1 min-w-[120px]"> <UploadCloud className="h-4 w-4" /> Upload Doc</Button>
+          <Button variant="outline" size="lg" className="gap-1 flex-1 min-w-[120px]"> <UserPlus className="h-4 w-4" /> Invite</Button>
         </div>
       </div>
       <Separator className="mb-2" />
       {/* Stats Grid */}
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         {[
           { title: "Active Projects / Chats", value: stats.activeProjects, icon: Briefcase, description: "Ongoing conversations & projects" },
           { title: "Analyses Completed", value: stats.analysesCompleted, icon: BarChartBig, description: "Total AI analyses performed" },
@@ -90,11 +90,11 @@ export default function DashboardPageClient() {
         ))}
       </div>
       {/* Main Dashboard Layout: Activity Feed and Agent Usage */}
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3 items-start">
-        <div className="lg:col-span-2">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3 items-start">
+        <div className="lg:col-span-2 min-w-0">
           <RecentActivityFeed />
         </div>
-        <div className="lg:col-span-1 flex flex-col gap-2">
+        <div className="lg:col-span-1 flex flex-col gap-2 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <span className="font-medium text-sm">AI Agent Usage</span>
             <div className="flex gap-1">
@@ -103,7 +103,9 @@ export default function DashboardPageClient() {
               ))}
             </div>
           </div>
-          <AgentUsageChart range={usageRange} />
+          <div className="w-full overflow-x-auto">
+            <AgentUsageChart range={usageRange} />
+          </div>
         </div>
       </div>
       {/* Quick Access */}
