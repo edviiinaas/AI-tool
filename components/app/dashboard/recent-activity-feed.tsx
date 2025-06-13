@@ -39,13 +39,13 @@ export function RecentActivityFeed() {
                 const Icon = activityIcons[activity.type as keyof typeof activityIcons] || activityIcons.default
                 const agent = getAgentDetails(activity.user)
                 const userInitial = agent ? agent.name.charAt(0) : activity.user.charAt(0)
-                const avatarColor = agent ? agent.themeColor : undefined
+                const avatarColor = agent ? agent.color : undefined
 
                 return (
                   <div key={activity.id} className="flex items-start space-x-3">
                     <Avatar className="h-9 w-9 border">
                       {agent ? (
-                        <agent.avatar className="h-full w-full p-1.5" style={{ color: avatarColor }} />
+                        <agent.icon className="h-6 w-6" style={{ color: avatarColor }} />
                       ) : (
                         <AvatarFallback>{userInitial.toUpperCase()}</AvatarFallback>
                       )}
