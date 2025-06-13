@@ -15,6 +15,9 @@ interface SettingsTabsProps {
 }
 
 export function SettingsTabs({ tabs, activeTab, onTabChange }: SettingsTabsProps) {
+  // Find the active tab object
+  const activeTabObj = tabs.find(tab => tab.value === activeTab)
+
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-10 mb-6">
@@ -24,11 +27,14 @@ export function SettingsTabs({ tabs, activeTab, onTabChange }: SettingsTabsProps
           </TabsTrigger>
         ))}
       </TabsList>
-      {tabs.map(tab => (
-        <TabsContent key={tab.value} value={tab.value}>
-          {tab.component}
+      {/* Only render the active tab's content */}
+      {activeTabObj ? (
+        <TabsContent key={activeTabObj.value} value={activeTabObj.value} forceMount>
+          {activeTabObj.component}
         </TabsContent>
-      ))}
+      ) : (
+        <div className="p-4">Invalid tab selected.</div>
+      )}
     </Tabs>
   )
 }
