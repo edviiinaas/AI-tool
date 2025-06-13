@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { WelcomeStep } from "./steps/welcome-step"
+import WelcomeStep from "./steps/welcome-step"
 import { AgentSelectionStep } from "./steps/agent-selection-step"
 import { DocumentUploadStep } from "./steps/document-upload-step"
 import { FirstMessageStep } from "./steps/first-message-step"
@@ -60,6 +60,16 @@ export default function OnboardingWizard() {
     setOnboardingData((prev) => ({ ...prev, ...data }))
   }
 
+  const handleFirstMessageComplete = () => {
+    updateOnboardingData({ firstMessageSent: true })
+    handleNext()
+  }
+
+  const handleTeamInviteComplete = () => {
+    updateOnboardingData({ teamInvitesSent: onboardingData.teamInvitesSent + 1 })
+    handleNext()
+  }
+
   const progressPercentage = (currentStep / totalSteps) * 100
 
   const stepTitles = [
@@ -99,8 +109,8 @@ export default function OnboardingWizard() {
         {currentStep === 1 && <WelcomeStep data={onboardingData} updateData={updateOnboardingData} />}
         {currentStep === 2 && <AgentSelectionStep data={onboardingData} updateData={updateOnboardingData} />}
         {currentStep === 3 && <DocumentUploadStep data={onboardingData} updateData={updateOnboardingData} />}
-        {currentStep === 4 && <FirstMessageStep data={onboardingData} updateData={updateOnboardingData} />}
-        {currentStep === 5 && <InviteTeamStep data={onboardingData} updateData={updateOnboardingData} />}
+        {currentStep === 4 && <FirstMessageStep onComplete={handleFirstMessageComplete} />}
+        {currentStep === 5 && <InviteTeamStep onComplete={handleTeamInviteComplete} />}
       </CardContent>
       <CardFooter className="flex justify-between border-t pt-6">
         <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>

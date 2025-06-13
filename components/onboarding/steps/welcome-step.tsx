@@ -8,7 +8,7 @@ interface StepProps {
   updateData: (data: { companyName: string }) => void
 }
 
-export function WelcomeStep({ data, updateData }: StepProps) {
+export default function WelcomeStep({ data, updateData }: StepProps) {
   return (
     <div className="space-y-6 text-center">
       <h2 className="text-xl font-medium">Let's get your workspace ready in {APP_NAME}.</h2>

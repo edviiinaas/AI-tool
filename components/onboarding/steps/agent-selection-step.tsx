@@ -43,7 +43,7 @@ export function AgentSelectionStep({ data, updateData }: StepProps) {
               />
               <div className="flex-grow">
                 <Label htmlFor={`agent-${agent.id}`} className="font-medium flex items-center cursor-pointer">
-                  <agent.avatar className="h-5 w-5 mr-2" style={{ color: agent.themeColor }} />
+                  <agent.icon className="h-5 w-5 mr-2" style={{ color: agent.color }} />
                   {agent.name}
                 </Label>
                 <p className="text-xs text-muted-foreground">{agent.description}</p>

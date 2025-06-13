@@ -44,6 +44,8 @@ export default function ClientAppPagesLayout({
 
   const [isConversationPanelOpen, setIsConversationPanelOpen] = useState(true)
   const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const handleToggleSidebar = () => setIsSidebarOpen((prev) => !prev)
 
   // Determine if side panels should be shown based on route
   const showSidePanels = pathname === "/app" || pathname === "/app/" // Only for the main chat page
@@ -57,6 +59,11 @@ export default function ClientAppPagesLayout({
   const defaultAppHeaderProps = {
     pageTitle: "Dashboard", // Default title
     ...appHeaderProps, // Spread props from ChatPage, which might include selectedConversation and onExportConversation
+    onToggleSidebar: handleToggleSidebar,
+    isSidebarOpen: isSidebarOpen,
+    onExportConversation: appHeaderProps.onExportConversation && appHeaderProps.selectedConversation
+      ? () => appHeaderProps.onExportConversation?.(appHeaderProps.selectedConversation!)
+      : undefined,
   }
 
   return (
@@ -69,13 +76,7 @@ export default function ClientAppPagesLayout({
               isConversationPanelOpen ? "w-72 md:w-80" : "w-0"
             } overflow-hidden border-r dark:border-zinc-700`}
           >
-            <ConversationHistory
-              conversations={conversations}
-              selectedConversationId={selectedConversationId}
-              onSelectConversation={onSelectConversation}
-              onCreateNewChat={onCreateNewChat}
-              onRenameConversation={onRenameConversation}
-            />
+            <ConversationHistory />
           </div>
         )}
         <main className="flex flex-1 flex-col gap-4 p-0 overflow-y-auto bg-background dark:bg-zinc-950">
@@ -89,7 +90,7 @@ export default function ClientAppPagesLayout({
               isAgentPanelOpen ? "w-72 md:w-80" : "w-0"
             } overflow-hidden border-l dark:border-zinc-700`}
           >
-            <AgentPanel activeAgentIds={activeAgentIds} onToggleAgent={onToggleAgent} userPlan={userPlan} />
+            <AgentPanel />
           </div>
         )}
       </div>

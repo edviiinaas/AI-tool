@@ -13,7 +13,7 @@ const getInitialAgentConfigs = (): AgentConfig[] => {
   // In a real app, this would fetch from DB or use a default set
   // For now, merge AGENTS constant with DEFAULT_AGENT_CONFIGS
   return AGENTS.map((agent) => {
-    const defaultConfig = DEFAULT_AGENT_CONFIGS[agent.id]
+    const defaultConfig = DEFAULT_AGENT_CONFIGS.find(config => config.agentId === agent.id)
     return {
       id: agent.id,
       name: agent.name,

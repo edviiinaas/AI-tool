@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function AgentSettingsPage() {
   return (
     <>
-      <BreadcrumbNav items={[{ label: "App", href: "/app" }, { label: "Agent Settings" }]} pageTitle="Agent Settings" />
+      <BreadcrumbNav />
       <AgentSettingsPageClient />
     </>
   )

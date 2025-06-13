@@ -17,7 +17,7 @@ import {
   FileBarChart,
   FileQuestion,
 } from "lucide-react"
-import type { Feature, HowItWorksStep, PricingTier, Testimonial, NotificationPreference, FaqItem } from "./types" // Added FaqItem to import
+import type { Feature, HowItWorksStep, PricingTier, Testimonial, NotificationPreference } from "./types"
 
 export const APP_NAME = "AIConstruct"
 export const APP_LOGO = Bot
@@ -81,6 +81,7 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
 
 export const PRICING_TIERS: PricingTier[] = [
   {
+    id: "starter",
     name: "Starter",
     price: "€9.90",
     pricePeriod: "/user/month",
@@ -90,6 +91,7 @@ export const PRICING_TIERS: PricingTier[] = [
     isFeatured: false,
   },
   {
+    id: "pro",
     name: "Pro",
     price: "€49",
     pricePeriod: "/user/month",
@@ -99,6 +101,7 @@ export const PRICING_TIERS: PricingTier[] = [
     isFeatured: true,
   },
   {
+    id: "enterprise",
     name: "Enterprise",
     price: "Custom",
     pricePeriod: "",
@@ -125,7 +128,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     name: "David Lee",
     title: "Project Manager, InfraPro",
-    quote: "Compliance AI eliminated 80% of our QA issues. That’s real ROI.",
+    quote: "Compliance AI eliminated 80% of our QA issues. That's real ROI.",
     avatar: "/placeholder.svg?width=40&height=40",
   },
 ]
@@ -170,8 +173,48 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreference[] = [
 ]
 
 export const AGENTS = [
-  { id: "magnus", name: "Magnus", icon: HardHat, color: "blue-500" },
-  { id: "pricing_ai", name: "Pricing AI", icon: Calculator, color: "green-500" },
+  { 
+    id: "magnus" as const, 
+    name: "Magnus", 
+    description: "Technical GQ Analyzer",
+    icon: HardHat, 
+    color: "blue-500" 
+  },
+  { 
+    id: "pricing-ai" as const, 
+    name: "Pricing AI", 
+    description: "Market Price Expert",
+    icon: Calculator, 
+    color: "green-500" 
+  },
+  { 
+    id: "market-bot" as const, 
+    name: "MarketBot", 
+    description: "Competitive Intelligence",
+    icon: BarChart3, 
+    color: "purple-500" 
+  },
+  { 
+    id: "closing-ai" as const, 
+    name: "Closing AI", 
+    description: "Sales Strategist",
+    icon: Handshake, 
+    color: "orange-500" 
+  },
+  { 
+    id: "compliance-ai" as const, 
+    name: "Compliance AI", 
+    description: "Regulatory Checker",
+    icon: ShieldCheck, 
+    color: "red-500" 
+  },
+  { 
+    id: "risk-bot" as const, 
+    name: "RiskBot", 
+    description: "Risk Assessor",
+    icon: AlertTriangle, 
+    color: "yellow-500" 
+  }
 ]
 
 export const FILE_ICONS = {
@@ -185,15 +228,35 @@ export const DEFAULT_AGENT_CONFIGS = AGENTS.map((agent) => ({
   agentId: agent.id,
   name: agent.name,
   plan: "starter",
+  masterPrompt: `This is ${agent.name}. I am an AI assistant specialized in ${agent.description.toLowerCase()}.`,
+  temperature: 0.5,
+  responseStyle: "balanced" as const,
+  tokenLimit: 2000,
+  knowledgeDocumentIds: [],
+  isEnabled: true
 }))
 
 export const MOCK_KNOWLEDGE_DOCS = [
-  { id: "kb_doc_1", name: "EN_1991-1-4_Wind_Actions.pdf", type: "pdf" },
-  { id: "kb_doc_2", name: "Concrete_Mix_Specifications.xlsx", type: "excel" },
+  { 
+    id: "kb_doc_1", 
+    name: "EN_1991-1-4_Wind_Actions.pdf", 
+    type: "pdf" as const,
+    size: "2.5MB",
+    uploadedAt: new Date(),
+    status: "ready" as const
+  },
+  { 
+    id: "kb_doc_2", 
+    name: "Concrete_Mix_Specifications.xlsx", 
+    type: "csv" as const,
+    size: "1.8MB",
+    uploadedAt: new Date(),
+    status: "ready" as const
+  }
 ]
 
 // Added FAQ_ITEMS
-export const FAQ_ITEMS: FaqItem[] = [
+export const FAQ_ITEMS = [
   {
     id: "faq1",
     question: "What types of documents can AIConstruct analyze?",
