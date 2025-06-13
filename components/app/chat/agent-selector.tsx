@@ -24,7 +24,7 @@ function arraysEqual(a: string[], b: string[]) {
   return a.length === b.length && a.every(id => b.includes(id))
 }
 
-export function AgentSelector({ isAdmin = false }: { isAdmin?: boolean }) {
+export function AgentSelector({ isAdmin = false, onAgentSettings }: { isAdmin?: boolean, onAgentSettings?: (agent: any) => void }) {
   const { user } = useAuth()
   const { agents, loadAgents, createAgent, updateAgent, deleteAgent, selectedAgents, setSelectedAgents, mode, setMode } = useChatStore()
   const [loading, setLoading] = useState(true)
@@ -194,6 +194,9 @@ export function AgentSelector({ isAdmin = false }: { isAdmin?: boolean }) {
                           <button onClick={e => { e.stopPropagation(); handleEdit(agent) }}>✏️</button>
                           <button onClick={e => { e.stopPropagation(); handleDelete(agent) }}>🗑️</button>
                         </span>
+                      )}
+                      {onAgentSettings && (
+                        <button onClick={() => onAgentSettings(agent)} title="Agent Settings">⚙️</button>
                       )}
                     </button>
                   </TooltipTrigger>
