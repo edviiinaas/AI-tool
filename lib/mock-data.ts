@@ -81,6 +81,11 @@ export const mockTeamMembers: Array<User & { role: string; lastActive: string }>
     fullName: "John Construct",
     plan: "starter",
     onboardingCompleted: true,
+    user_metadata: {
+      full_name: "John Construct",
+      email: "john@buildcraft.com",
+      avatar_url: undefined
+    }
   },
   {
     id: "2",
@@ -91,6 +96,11 @@ export const mockTeamMembers: Array<User & { role: string; lastActive: string }>
     fullName: "Sarah Engineer",
     plan: "starter",
     onboardingCompleted: true,
+    user_metadata: {
+      full_name: "Sarah Engineer",
+      email: "sarah.e@buildcraft.com",
+      avatar_url: undefined
+    }
   },
   {
     id: "3",
@@ -101,6 +111,11 @@ export const mockTeamMembers: Array<User & { role: string; lastActive: string }>
     fullName: "Mike Planner",
     plan: "starter",
     onboardingCompleted: true,
+    user_metadata: {
+      full_name: "Mike Planner",
+      email: "mike.p@buildcraft.com",
+      avatar_url: undefined
+    }
   },
   {
     id: "4",
@@ -111,6 +126,11 @@ export const mockTeamMembers: Array<User & { role: string; lastActive: string }>
     fullName: "Alice Viewer",
     plan: "starter",
     onboardingCompleted: true,
+    user_metadata: {
+      full_name: "Alice Viewer",
+      email: "alice.v@buildcraft.com",
+      avatar_url: undefined
+    }
   },
 ]
 
