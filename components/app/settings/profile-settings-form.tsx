@@ -7,28 +7,38 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/contexts/auth-context"
 import { Camera, Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast" // Assuming useToast is available
+import { useToast } from "@/components/ui/use-toast"
 
-export function ProfileSettingsForm() {
-  const { user, isLoading: authLoading, getCurrentUser, login } = useAuth() // Assuming login can update user details for mock
+interface ProfileSettingsFormProps {
+  user: {
+    id: string;
+    fullName: string;
+    email: string;
+    companyName: string;
+  };
+  onSave: (data: Partial<{
+    id: string;
+    fullName: string;
+    email: string;
+    companyName: string;
+  }>) => void;
+}
+
+export function ProfileSettingsForm({ user, onSave }: ProfileSettingsFormProps) {
   const { toast } = useToast()
 
-  const [fullName, setFullName] = useState("")
-  const [companyName, setCompanyName] = useState("")
-  const [email, setEmail] = useState("")
+  const [fullName, setFullName] = useState(user.fullName || "")
+  const [companyName, setCompanyName] = useState(user.companyName || "")
+  const [email] = useState(user.email || "")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(`/placeholder.svg?width=96&height=96&query=${user.email.charAt(0)}`)
 
   useEffect(() => {
-    if (user) {
-      setFullName(user.fullName || "")
-      setCompanyName(user.companyName || "")
-      setEmail(user.email || "")
-      // Mock avatar based on email
-      setAvatarPreview(`/placeholder.svg?width=96&height=96&query=${user.email.charAt(0)}`)
-    }
+    setFullName(user.fullName || "")
+    setCompanyName(user.companyName || "")
+    // email is not editable
+    setAvatarPreview(`/placeholder.svg?width=96&height=96&query=${user.email.charAt(0)}`)
   }, [user])
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +49,6 @@ export function ProfileSettingsForm() {
         setAvatarPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
-      // In a real app, you'd upload this file.
       toast({
         title: "Profile Picture Updated (Mock)",
         description: `${file.name} selected. In a real app, this would be uploaded.`,
@@ -49,45 +58,15 @@ export function ProfileSettingsForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user) return
-
     setIsSubmitting(true)
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Mock update user details in AuthContext
-    // In a real app, this would be an API call, and AuthContext might refresh user data
-    const updatedUser = {
-      ...user,
-      fullName,
-      companyName,
-      // email is not editable here
-    }
-    // This is a hack for mock. Ideally, AuthProvider would have an updateUser method.
-    // For now, we'll re-trigger a "login" like action to update the stored user.
-    // This is NOT how you'd do it in a real app.
-    localStorage.setItem("authUser_aic", JSON.stringify(updatedUser))
-    await login(updatedUser.email) // This will re-set user in context and storage
-
+    onSave({ fullName, companyName })
     setIsSubmitting(false)
     toast({
       title: "Profile Updated",
       description: "Your profile information has been successfully updated.",
     })
-  }
-
-  if (authLoading && !user) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>Update your personal and company details.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center items-center h-40">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
-    )
   }
 
   return (
