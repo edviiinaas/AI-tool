@@ -11,7 +11,7 @@ import Link from "next/link"
 import { Loader2, Eye, EyeOff } from "lucide-react"
 import { APP_LOGO, APP_NAME } from "@/lib/constants"
 import { FcGoogle } from "react-icons/fc"
-import { SiMicrosoft } from "react-icons/si"
+import { FaMicrosoft } from "react-icons/fa"
 import { supabase } from "@/lib/supabase"
 import { FaGithub, FaSlack } from "react-icons/fa"
 
@@ -148,7 +148,7 @@ export function LoginForm() {
               className="w-full flex items-center gap-2"
               onClick={() => handleSocialLogin("azure")}
             >
-              <SiMicrosoft className="h-5 w-5 text-[#2F2F2F]" /> Continue with Microsoft
+              <FaMicrosoft className="h-5 w-5 text-[#2F2F2F]" /> Continue with Microsoft
             </Button>
             <Button
               type="button"

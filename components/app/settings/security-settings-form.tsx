@@ -32,6 +32,9 @@ export function SecuritySettingsForm() {
   const [totpCode, setTotpCode] = useState("")
   const [totpError, setTotpError] = useState("")
 
+  const [factorId, setFactorId] = useState<string | null>(null)
+  const [challengeId, setChallengeId] = useState<string | null>(null)
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setPasswordError("")
@@ -94,6 +97,8 @@ export function SecuritySettingsForm() {
       if (error) throw error
       setTotpSecret(data?.totp?.secret || null)
       setTotpUri(data?.totp?.uri || null)
+      setFactorId(data?.id || null)
+      setChallengeId(null)
     } catch (err: any) {
       setTotpError(err.message || "Failed to start 2FA setup.")
       setIsTOTPEnrolling(false)
@@ -105,13 +110,22 @@ export function SecuritySettingsForm() {
     e.preventDefault()
     setTotpError("")
     try {
-      const { error } = await supabase.auth.mfa.verify({ factorType: "totp", code: totpCode })
+      if (!factorId) throw new Error("Missing factorId for verification.")
+      // Step 1: Create challenge
+      const challenge = await supabase.auth.mfa.challenge({ factorId })
+      if (challenge.error) throw challenge.error
+      const challengeId = challenge.data.id
+      setChallengeId(challengeId)
+      // Step 2: Verify
+      const { error } = await supabase.auth.mfa.verify({ factorId, challengeId, code: totpCode })
       if (error) throw error
       setIsTwoFactorEnabled(true)
       setIsTOTPEnrolling(false)
       setTotpSecret(null)
       setTotpUri(null)
       setTotpCode("")
+      setFactorId(null)
+      setChallengeId(null)
       toast({ title: "2FA Enabled", description: "Two-factor authentication is now active." })
     } catch (err: any) {
       setTotpError(err.message || "Invalid code. Please try again.")
@@ -123,9 +137,11 @@ export function SecuritySettingsForm() {
     setIsTwoFactorSubmitting(true)
     setTotpError("")
     try {
-      const { error } = await supabase.auth.mfa.unenroll({ factorType: "totp" })
+      if (!factorId) throw new Error("Missing factorId for removal.")
+      const { error } = await supabase.auth.mfa.unenroll({ factorId })
       if (error) throw error
       setIsTwoFactorEnabled(false)
+      setFactorId(null)
       toast({ title: "2FA Disabled", description: "Two-factor authentication has been disabled." })
     } catch (err: any) {
       setTotpError(err.message || "Failed to disable 2FA.")
