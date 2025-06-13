@@ -6,7 +6,7 @@ interface ChatAreaProps {
   onNewMessage: (conversationId: string, message: Message) => Promise<void>
   onAgentResponse: (conversationId: string, agentMessages: Message[]) => Promise<void>
   onEditMessage: (conversationId: string, messageId: string, newText: string) => Promise<void>
-  onUpdateMessageStatus: (conversationId: string, messageId: string, status: string) => Promise<void>
+  onUpdateMessageStatus: (conversationId: string, messageId: string, status: Message["status"]) => Promise<void>
   isLoadingConversation: boolean
 }
 
