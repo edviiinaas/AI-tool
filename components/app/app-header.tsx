@@ -193,7 +193,7 @@ export function AppHeader({
           </DropdownMenu>
         </div>
       </header>
-      <GlobalSearchDialog isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
+      <GlobalSearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </>
   )
 }
