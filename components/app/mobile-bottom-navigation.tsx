@@ -21,8 +21,8 @@ export function MobileBottomNavigation() {
         {navItems.map((item) => {
           const isActive =
             item.href === "/app"
-              ? pathname === "/app" || pathname.startsWith("/app/chat")
-              : pathname.startsWith(item.href)
+              ? pathname === "/app" || (pathname && pathname.startsWith("/app/chat"))
+              : pathname && pathname.startsWith(item.href)
           return (
             <Link
               key={item.label}

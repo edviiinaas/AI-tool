@@ -122,24 +122,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true)
 
     const handleRedirects = (sessionUser: SupabaseUser | null | undefined) => {
-      const isAuthPage = pathname.startsWith("/auth/")
+      const isAuthPage = pathname && pathname.startsWith("/auth/")
       // Only redirect from auth pages
       if (sessionUser) {
         const onboardingCompleted = sessionUser.user_metadata?.onboarding_completed
         if (isAuthPage) {
-          if (!onboardingCompleted) {
-            router.push("/onboarding")
-          } else {
+          if (onboardingCompleted) {
             router.push("/app")
+          } else {
+            router.push("/onboarding")
           }
         }
-        // Do not redirect from /app, /onboarding, or landing page
-      } else {
-        // User is not authenticated
-        if (isAuthPage) return // Stay on auth pages
-        if (pathname.startsWith("/app") || pathname.startsWith("/onboarding")) {
-          router.push("/auth/login")
-        }
+      } else if (pathname && !pathname.startsWith("/auth/")) {
+        router.push("/auth/login")
       }
     }
 

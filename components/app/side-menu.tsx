@@ -95,7 +95,7 @@ export function SideMenu({ isOpen }: SideMenuProps) {
       <ScrollArea className="flex-1 px-2 py-4">
         <nav className="grid gap-1">
           {menuItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+            const isActive = pathname === item.href || (pathname && pathname.startsWith(item.href + "/"))
             return (
               <Button
                 key={item.href}

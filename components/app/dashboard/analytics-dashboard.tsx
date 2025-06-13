@@ -24,19 +24,19 @@ export function AnalyticsDashboard() {
       // Fetch users
       const { data: users } = await supabase.from("users").select("id")
       // Aggregate
-      const byAgent: Record<string, number> = {}
-      const byDay: Record<string, number> = {}
+      const byAgent: { [key: string]: number } = {}
+      let messagesByDay: { [key: string]: number } = Object.create(null)
       (messages || []).forEach((msg: any) => {
         if (msg.sender && AGENT_IDS.includes(msg.sender)) {
           byAgent[msg.sender] = (byAgent[msg.sender] || 0) + 1
         }
         const day = msg.created_at?.slice(0, 10)
-        if (day) byDay[day] = (byDay[day] || 0) + 1
+        if (day) messagesByDay[day] = (messagesByDay[day] || 0) + 1
       })
       setMessageStats({
         total: (messages || []).length,
         byAgent,
-        byDay,
+        byDay: messagesByDay,
         users: (users || []).length
       })
       setLoading(false)

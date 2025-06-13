@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import formidable from 'formidable'
+// @ts-ignore
 import fs from 'fs'
 import pdfParse from 'pdf-parse'
 import mammoth from 'mammoth'
@@ -33,7 +34,7 @@ async function extractFromXLSX(filePath: string) {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
+  if ((req as any).method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
   const form = new formidable.IncomingForm()
@@ -45,8 +46,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const results = []
       for (const key in files) {
         const file = Array.isArray(files[key]) ? files[key][0] : files[key]
-        const filePath = file.filepath || file.path
-        const fileType = file.mimetype || file.type
+        if (!file) continue
+        const filePath = (file as any).filepath || (file as any).path
+        const fileType = (file as any).mimetype || (file as any).type
         let extracted = { text: '', images: [] as any[] }
         if (fileType === 'application/pdf') {
           extracted = await extractFromPDF(filePath)
