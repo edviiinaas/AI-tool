@@ -166,3 +166,11 @@ export interface Testimonial {
   quote: string
   avatar: string
 }
+
+export interface Invoice {
+  id: string;
+  date: string; // or Date
+  amount: number;
+  status: "paid" | "unpaid" | "overdue";
+  // Add any other fields as needed
+}
