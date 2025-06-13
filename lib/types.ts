@@ -7,9 +7,16 @@ export type PlanType = "starter" | "pro" | "enterprise"
 export type MessageRole = "user" | "assistant" // Kept for simplicity, sender determines actual source
 export type AgentSlug = "magnus" | "pricing-ai" | "market-bot" | "closing-ai" | "compliance-ai" | "risk-bot" // From constants
 
+export interface UserMetadata {
+  full_name?: string
+  avatar_url?: string
+  email?: string
+}
+
 export interface User {
   id: string
-  email: string
+  email?: string
+  user_metadata: UserMetadata
   fullName?: string
   companyName?: string // Added for onboarding/workspace context
   plan: PlanType // User's current plan

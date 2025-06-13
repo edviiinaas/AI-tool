@@ -5,8 +5,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button"
 import { Mail, BookOpen, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import { useProductTour } from "@/components/app/product-tour-provider"
 
 export function HelpPanel() {
+  const { startTour } = useProductTour()
   return (
     <Card className="max-w-xl mx-auto">
       <CardHeader>
@@ -57,6 +59,11 @@ export function HelpPanel() {
         <section>
           <h3 className="font-semibold mb-2">AI Chatbot (Coming Soon)</h3>
           <p>Get instant answers to your questions with our AI-powered help assistant. (Feature coming soon!)</p>
+        </section>
+        <section>
+          <Button onClick={startTour} variant="default" className="w-full mt-2">
+            Start Product Tour
+          </Button>
         </section>
       </CardContent>
     </Card>

@@ -114,7 +114,7 @@ export default function KnowledgePageClient() {
   }
 
   return (
-    <div className="space-y-8">
+    <div data-tour="knowledge" className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-primary dark:text-primary-foreground/90">

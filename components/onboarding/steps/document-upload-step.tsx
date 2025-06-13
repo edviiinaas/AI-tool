@@ -5,6 +5,7 @@ import { UploadCloud, FileText, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useDropzone } from "react-dropzone"
 import { toast } from "sonner"
+import { useNotificationSystem } from "@/contexts/notification-settings-context"
 
 interface StepProps {
   data: { uploadedDocumentName: string | null }
@@ -14,6 +15,7 @@ interface StepProps {
 export function DocumentUploadStep({ data, updateData }: StepProps) {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const { addNotification } = useNotificationSystem()
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -34,11 +36,17 @@ export function DocumentUploadStep({ data, updateData }: StepProps) {
         setTimeout(() => {
           updateData({ uploadedDocumentName: firstFile.name })
           toast.success(`Mock upload: "${firstFile.name}" ready for processing.`)
+          addNotification({
+            title: "Document Uploaded",
+            description: `Document '${firstFile.name}' uploaded successfully.`,
+            eventType: "docAnalysisComplete",
+            href: "/app/knowledge"
+          })
           setIsUploading(false)
         }, 1500)
       }
     },
-    [updateData],
+    [updateData, addNotification],
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

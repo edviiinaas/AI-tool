@@ -98,3 +98,36 @@ body,
 #__next {
   height: 100%;
 }
+
+/* Product Tour Styles */
+.custom-tour-tooltip {
+  @apply bg-background border shadow-lg rounded-lg p-4 max-w-sm;
+}
+
+.custom-tour-tooltip .introjs-tooltip-title {
+  @apply text-lg font-semibold mb-2;
+}
+
+.custom-tour-tooltip .introjs-tooltiptext {
+  @apply text-sm text-muted-foreground;
+}
+
+.custom-tour-tooltip .introjs-button {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors;
+}
+
+.custom-tour-tooltip .introjs-button.introjs-prevbutton {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
+}
+
+.custom-tour-tooltip .introjs-button.introjs-skipbutton {
+  @apply bg-transparent text-muted-foreground hover:text-foreground;
+}
+
+.custom-tour-tooltip .introjs-bullets ul li a {
+  @apply bg-muted hover:bg-primary;
+}
+
+.custom-tour-tooltip .introjs-bullets ul li a.active {
+  @apply bg-primary;
+}

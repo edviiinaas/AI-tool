@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Loader2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
+import { useNotificationSystem } from "@/contexts/notification-settings-context"
 
 interface ProfileSettingsFormProps {
   user: {
@@ -27,6 +28,7 @@ interface ProfileSettingsFormProps {
 
 export function ProfileSettingsForm({ user, onSave }: ProfileSettingsFormProps) {
   const { toast } = useToast()
+  const { addNotification } = useNotificationSystem()
 
   const [fullName, setFullName] = useState(user.fullName || "")
   const [companyName, setCompanyName] = useState(user.companyName || "")
@@ -66,6 +68,12 @@ export function ProfileSettingsForm({ user, onSave }: ProfileSettingsFormProps) 
     toast({
       title: "Profile Updated",
       description: "Your profile information has been successfully updated.",
+    })
+    addNotification({
+      title: "Profile Updated",
+      description: "Your profile was updated successfully.",
+      eventType: "newFeature",
+      href: "/app/settings?tab=profile"
     })
   }
 

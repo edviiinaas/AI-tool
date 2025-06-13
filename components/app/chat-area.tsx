@@ -20,7 +20,7 @@ export function ChatArea({
   isLoadingConversation,
 }: ChatAreaProps) {
   return (
-    <div>
+    <div data-tour="chat">
       {/* Chat Area Content */}
       <p>This is the chat area.</p>
       {/* You can add more UI here using the props */}

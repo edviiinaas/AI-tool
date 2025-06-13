@@ -64,7 +64,13 @@ export function AppHeader({
   return (
     <>
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="md:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleSidebar}
+          aria-label="Open sidebar"
+          data-tour="sidebar"
+        >
           {isSidebarOpen ? <PanelRightOpen className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
           <span className="sr-only">Toggle sidebar</span>
         </Button>
@@ -106,7 +112,7 @@ export function AppHeader({
             <span className="sr-only">Toggle theme</span>
           </Button>
 
-          <NotificationBell />
+          <NotificationBell data-tour="notifications" />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

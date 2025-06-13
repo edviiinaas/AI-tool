@@ -17,6 +17,7 @@ interface NotificationSettingsContextType {
   markAsRead: (notificationId: string) => void
   markAllAsRead: () => void
   unreadCount: number
+  clearAll: () => void
 }
 
 const NotificationSettingsContext = createContext<NotificationSettingsContextType | undefined>(undefined)
@@ -166,6 +167,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
   }, [])
 
+  const clearAll = useCallback(() => {
+    setNotifications([])
+  }, [])
+
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
@@ -180,6 +185,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         addNotification,
         markAsRead,
         markAllAsRead,
+        clearAll,
         unreadCount,
       }}
     >

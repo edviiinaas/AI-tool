@@ -8,9 +8,11 @@ import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase"
+import { useNotificationSystem } from "@/contexts/notification-settings-context"
 
 export default function TeamPageClient() {
   const { user } = useAuth()
+  const { addNotification } = useNotificationSystem()
   const [teamMembers, setTeamMembers] = useState<any[]>([])
   const [pendingInvitations, setPendingInvitations] = useState<any[]>([])
   const [newlyInvited, setNewlyInvited] = useState<{ email: string; role: string } | null>(null)
@@ -33,6 +35,12 @@ export default function TeamPageClient() {
   const handleInviteSent = (email: string, role: string) => {
     setNewlyInvited({ email, role })
     setIsInviteModalOpen(false)
+    addNotification({
+      title: "Team Invite Sent",
+      description: `Invitation sent to ${email} as ${role}.`,
+      eventType: "teamInviteAccepted",
+      href: "/app/team"
+    })
     // Optionally refetch team members/invitations
   }
 
@@ -41,7 +49,7 @@ export default function TeamPageClient() {
   }
 
   return (
-    <div className="space-y-8">
+    <div data-tour="team" className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-primary dark:text-primary-foreground/90">
           Team Management

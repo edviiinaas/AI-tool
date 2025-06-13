@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/components/ui/use-toast"
+import { useNotificationSystem } from "@/contexts/notification-settings-context"
 
 const totalSteps = 5
 
@@ -36,6 +37,7 @@ export default function OnboardingWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const { addNotification } = useNotificationSystem()
 
   const handleNext = async () => {
     if (currentStep === 1 && !onboardingData.companyName.trim()) {
@@ -51,6 +53,12 @@ export default function OnboardingWizard() {
       try {
         await supabase.auth.updateUser({
           data: { onboarding_completed: true, company_name: onboardingData.companyName }
+        })
+        addNotification({
+          title: "Onboarding Complete!",
+          description: "You have successfully completed onboarding. Welcome to AIConstruct!",
+          eventType: "newFeature",
+          href: "/app/dashboard"
         })
         router.push("/app/dashboard")
       } catch (error) {

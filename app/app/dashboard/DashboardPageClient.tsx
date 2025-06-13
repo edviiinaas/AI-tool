@@ -51,7 +51,7 @@ export default function DashboardPageClient() {
   }, [user])
 
   return (
-    <div className="space-y-8">
+    <div data-tour="dashboard" className="space-y-8">
       {isLoading ? (
         <>
           <div>
