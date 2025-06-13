@@ -11,9 +11,6 @@ import { Send, Loader2, Pencil, Trash2, Smile, Paperclip } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Database } from "@/types/supabase"
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
-import 'emoji-mart/css/emoji-mart.css'
 import { useTheme } from "next-themes"
 
 interface Message {
@@ -420,26 +417,6 @@ export function ChatInterface() {
             />
             <Paperclip className="h-5 w-5 sm:h-4 sm:w-4" />
           </label>
-          <div className="relative">
-            <Button type="button" variant="ghost" size="icon" onClick={() => setShowEmojiPicker((v) => !v)}>
-              <Smile className="h-5 w-5 sm:h-4 sm:w-4" />
-            </Button>
-            {showEmojiPicker && (
-              <div className="absolute bottom-full right-0 mb-2">
-                <Picker
-                  data={data}
-                  onEmojiSelect={(emoji: any) => {
-                    setNewMessage((prev) => prev + emoji.native)
-                    setShowEmojiPicker(false)
-                  }}
-                  theme={theme === 'dark' ? 'dark' : 'light'}
-                  set="native"
-                  previewPosition="none"
-                  skinTonePosition="none"
-                />
-              </div>
-            )}
-          </div>
           <Input
             value={newMessage}
             onChange={handleInput}
