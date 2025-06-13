@@ -1,0 +1,21 @@
+{
+  "name": "AI Construction Assistants",
+  "short_name": "AIConstruct",
+  "description": "AI Employees for Construction Companies",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "/placeholder.svg?width=192&height=192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/placeholder.svg?width=512&height=512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

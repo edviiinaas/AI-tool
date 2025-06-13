@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 224 71.4% 4.1%; /* #09090b */
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+
+    --primary: 221 83% 53%; /* #1e3a8a dark blue */
+    --primary-foreground: 0 0% 98%; /* #fafafa */
+
+    --secondary: 220 14.3% 95.9%; /* #f1f5f9 */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* #1c1917 */
+
+    --muted: 240 4.8% 95.9%; /* #f8fafc light gray for backgrounds */
+    --muted-foreground: 240 3.8% 46.1%; /* #71717a */
+
+    --accent: 27 96% 53%; /* #f97316 orange */
+    --accent-foreground: 0 0% 98%; /* #fafafa */
+
+    --destructive: 0 84.2% 60.2%; /* #ef4444 */
+    --destructive-foreground: 0 0% 98%; /* #fafafa */
+
+    --border: 220 13% 91%; /* #e2e8f0 */
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%; /* primary color for rings */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 224 71.4% 4.1%; /* #09090b */
+    --foreground: 0 0% 98%; /* #fafafa */
+
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 217 91% 60%; /* #4f46e5 - Lighter blue for dark mode */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 220 20% 15%; /* #262626 */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 220 20% 10%; /* #171717 - Darker gray for muted backgrounds */
+    --muted-foreground: 240 5% 64.9%; /* #a1a1aa */
+
+    --accent: 30 90% 58%; /* #f59e0b - Slightly adjusted orange */
+    --accent-foreground: 224 71.4% 4.1%;
+
+    --destructive: 0 62.8% 30.6%; /* #991b1b */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 20% 20%; /* #333333 */
+    --input: 220 20% 20%;
+    --ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1; /* Enable common ligatures */
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-muted/50 dark:bg-muted/20;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-border dark:bg-secondary;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary/50 dark:bg-primary/70;
+}
+
+html,
+body,
+#__next {
+  height: 100%;
+}
