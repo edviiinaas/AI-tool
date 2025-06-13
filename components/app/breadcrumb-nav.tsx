@@ -19,6 +19,10 @@ function capitalizeFirstLetter(string: string) {
 
 export function BreadcrumbNav() {
   const pathname = usePathname()
+  
+  // Return null if pathname is null
+  if (!pathname) return null
+  
   const segments = pathname.split("/").filter(Boolean) // Filter out empty strings
 
   // Don't show breadcrumbs for the root app page or if no segments
