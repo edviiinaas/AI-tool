@@ -14,6 +14,7 @@ export interface User {
   companyName?: string // Added for onboarding/workspace context
   plan: PlanType // User's current plan
   onboardingCompleted: boolean
+  avatarUrl?: string // Optional avatar URL for user profile images
   // Supabase User object might have more fields like 'created_at', 'updated_at'
   // For this app, we primarily care about id and email for identification.
   // Other details might come from a separate 'profiles' table in Supabase.
