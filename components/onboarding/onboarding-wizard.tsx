@@ -135,15 +135,20 @@ export default function OnboardingWizard() {
         <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
           <ChevronLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <Button onClick={handleNext} className="bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <span className="flex items-center"><svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Processing...</span>
-          ) : currentStep === totalSteps ? (
-            <>Finish Setup<CheckCircle className="ml-2 h-4 w-4" /></>
-          ) : (
-            <>Next Step<ChevronRight className="ml-2 h-4 w-4" /></>
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => router.push('/app/dashboard')} disabled={isSubmitting}>
+            Skip
+          </Button>
+          <Button onClick={handleNext} className="bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <span className="flex items-center"><svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Processing...</span>
+            ) : currentStep === totalSteps ? (
+              <>Finish Setup<CheckCircle className="ml-2 h-4 w-4" /></>
+            ) : (
+              <>Next Step<ChevronRight className="ml-2 h-4 w-4" /></>
+            )}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   )

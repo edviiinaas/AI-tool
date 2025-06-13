@@ -16,9 +16,9 @@ export default function OnboardingPage() {
         router.push("/auth/verify-email")
       } else if (!user) {
         router.push("/auth/login")
+      } else if (user.onboardingCompleted) {
+        router.push("/app")
       }
-      // If user exists and is not pending, they can proceed with onboarding
-      // We might add a check here later to see if onboarding is already completed
     }
   }, [user, isLoading, isVerificationPending, router])
 

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { APP_LOGO, APP_NAME } from "@/lib/constants"
-import { Loader2 } from "lucide-react"
+import { Loader2, Eye, EyeOff } from "lucide-react"
 
 export function SignupForm() {
   const [email, setEmail] = useState("")
@@ -20,6 +20,8 @@ export function SignupForm() {
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { signup } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState(0)
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
@@ -40,6 +42,18 @@ export function SignupForm() {
     return null
   }
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value)
+    // Simple strength meter: 1 point for each rule
+    let score = 0
+    if (e.target.value.length >= 8) score++
+    if (/[A-Z]/.test(e.target.value)) score++
+    if (/[a-z]/.test(e.target.value)) score++
+    if (/[0-9]/.test(e.target.value)) score++
+    if (/[!@#$%^&*]/.test(e.target.value)) score++
+    setPasswordStrength(score)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
@@ -47,20 +61,27 @@ export function SignupForm() {
       setError("Please fill in all fields.")
       return
     }
-    
     const passwordError = validatePassword(password)
     if (passwordError) {
       setError(passwordError)
       return
     }
-    
     if (password !== confirmPassword) {
       setError("Passwords do not match.")
       return
     }
     setIsSubmitting(true)
     try {
-      await signup(email, fullName, companyName)
+      const { error } = await signup(email, password, fullName, companyName)
+      if (error) {
+        if (error.message.includes("already registered")) {
+          setError("An account with this email already exists.")
+        } else {
+          setError(error.message || "Signup failed. Please try again.")
+        }
+        setIsSubmitting(false)
+        return
+      }
       // Redirect is handled by AuthContext
     } catch (err) {
       setError((err as Error).message || "Signup failed. Please try again.")
@@ -119,14 +140,22 @@ export function SignupForm() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isSubmitting}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={handlePasswordChange}
+                  required
+                  disabled={isSubmitting}
+                />
+                <button type="button" className="absolute right-2 top-2" onClick={() => setShowPassword(v => !v)} tabIndex={-1}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div className="h-2 w-full bg-gray-200 rounded mt-1">
+                <div className={`h-2 rounded ${passwordStrength <= 2 ? 'bg-red-400' : passwordStrength === 3 ? 'bg-yellow-400' : 'bg-green-500'}`} style={{ width: `${passwordStrength * 20}%` }} />
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
