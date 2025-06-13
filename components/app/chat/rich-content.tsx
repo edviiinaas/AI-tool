@@ -13,6 +13,35 @@ import { Badge } from "@/components/ui/badge"
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer
 } from 'recharts'
+import { Fragment } from 'react'
+
+// Custom PieChart component
+function PieChartComponent({ data, dataKey, nameKey, colors }: { 
+  data: any[]; 
+  dataKey: string; 
+  nameKey: string; 
+  colors: string[] 
+}) {
+  return (
+    <PieChart>
+      <Pie
+        data={data}
+        dataKey={dataKey}
+        nameKey={nameKey}
+        cx="50%"
+        cy="50%"
+        outerRadius={80}
+        fill={colors[0] || '#8884d8'}
+        label
+        labelLine={false}
+      >
+        {data.map((entry: any, idx: number) => (
+          <Cell key={`cell-${idx}`} fill={colors[idx % colors.length] || '#8884d8'} />
+        ))}
+      </Pie>
+    </PieChart>
+  )
+}
 
 interface RichContentProps {
   content: {
@@ -109,59 +138,44 @@ export function RichContent({ content }: RichContentProps) {
       return <p className="text-muted-foreground">{content.data}</p>
 
     case 'chart': {
-      const { chartType, data, xKey, yKey, dataKey, colors = [] } = content.data || {}
+      const { chartType, data, xKey, yKey, colors = [] } = content.data || {}
       if (!data || !Array.isArray(data) || !chartType) {
         return <div className="text-muted-foreground">Invalid chart data</div>
       }
+
+      let ChartComponent = null;
+      if (chartType === 'bar') {
+        ChartComponent = (
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={xKey} />
+            <YAxis />
+            <RechartsTooltip />
+            <Legend />
+            <Bar dataKey={yKey} fill={colors[0] || '#8884d8'} />
+          </BarChart>
+        );
+      } else if (chartType === 'line') {
+        ChartComponent = (
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={xKey} />
+            <YAxis />
+            <RechartsTooltip />
+            <Legend />
+            <Line type="monotone" dataKey={yKey} stroke={colors[0] || '#8884d8'} />
+          </LineChart>
+        );
+      }
+
+      if (!ChartComponent) {
+        return <div className="text-muted-foreground">Unsupported chart type: {chartType}</div>
+      }
+
       return (
         <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">
-            {chartType === 'bar' && (
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey={xKey} />
-                <YAxis />
-                <RechartsTooltip />
-                <Legend />
-                <Bar dataKey={yKey} fill={colors[0] || '#8884d8'} />
-              </BarChart>
-            )}
-            {chartType === 'line' && (
-              <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey={xKey} />
-                <YAxis />
-                <RechartsTooltip />
-                <Legend />
-                <Line type="monotone" dataKey={yKey} stroke={colors[0] || '#8884d8'} />
-              </LineChart>
-            )}
-            {chartType === 'pie' && (
-              <PieChart>
-                {/* @ts-expect-error Recharts PieChart supports children as array, but TS linter is strict */}
-                {[
-                   <RechartsTooltip key="tooltip" />,
-                   <Legend key="legend" />,
-                   <Pie
-                     key="pie"
-                     data={data}
-                     dataKey={dataKey || yKey}
-                     nameKey={xKey}
-                     cx="50%"
-                     cy="50%"
-                     outerRadius={80}
-                     fill={colors[0] || '#8884d8'}
-                   >
-                     {data.map((entry: any, idx: number) => (
-                       <Cell key={`cell-${idx}`} fill={colors[idx % colors.length] || '#8884d8'} />
-                     ))}
-                   </Pie>
-                 ]}
-              </PieChart>
-            )}
-            {!['bar', 'line', 'pie'].includes(chartType) && (
-              <div className="text-muted-foreground">Unsupported chart type: {chartType}</div>
-            )}
+            {ChartComponent}
           </ResponsiveContainer>
         </div>
       )
