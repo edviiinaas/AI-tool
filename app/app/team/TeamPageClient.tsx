@@ -1,19 +1,39 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { TeamMembersTable } from "@/components/app/team/team-members-table"
 import { InviteMemberModal } from "@/components/app/team/invite-member-modal"
 import { PendingInvitationsTable } from "@/components/app/team/pending-invitations-table"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { useAuth } from "@/contexts/auth-context"
+import { supabase } from "@/lib/supabase"
 
 export default function TeamPageClient() {
+  const { user } = useAuth()
+  const [teamMembers, setTeamMembers] = useState<any[]>([])
+  const [pendingInvitations, setPendingInvitations] = useState<any[]>([])
   const [newlyInvited, setNewlyInvited] = useState<{ email: string; role: string } | null>(null)
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
 
+  useEffect(() => {
+    if (!user) return
+    // Fetch team members
+    supabase.from("users").select("*")
+      .then(({ data }) => setTeamMembers(data || []))
+    // Fetch pending invitations
+    supabase.from("invitations").select("*")
+      .then(({ data }) => setPendingInvitations(data || []))
+  }, [user])
+
+  if (!user) {
+    return <div>Loading team data...</div>
+  }
+
   const handleInviteSent = (email: string, role: string) => {
     setNewlyInvited({ email, role })
-    setIsInviteModalOpen(false) // Close modal on success
+    setIsInviteModalOpen(false)
+    // Optionally refetch team members/invitations
   }
 
   const handleClearNewInvitation = () => {
@@ -43,7 +63,7 @@ export default function TeamPageClient() {
           />
         </CardHeader>
         <CardContent>
-          <TeamMembersTable onInviteClick={() => setIsInviteModalOpen(true)} />
+          <TeamMembersTable teamMembers={teamMembers} onInviteClick={() => setIsInviteModalOpen(true)} />
         </CardContent>
       </Card>
 
@@ -53,7 +73,7 @@ export default function TeamPageClient() {
           <CardDescription>Track invitations that have been sent but not yet accepted.</CardDescription>
         </CardHeader>
         <CardContent>
-          <PendingInvitationsTable newInvitation={newlyInvited} onClearNewInvitation={handleClearNewInvitation} />
+          <PendingInvitationsTable invitations={pendingInvitations} newInvitation={newlyInvited} onClearNewInvitation={handleClearNewInvitation} />
         </CardContent>
       </Card>
     </div>

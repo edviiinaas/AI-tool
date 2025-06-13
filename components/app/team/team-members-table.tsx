@@ -34,32 +34,22 @@ type TeamMember = User & { role: string; lastActive: string }
 const ROLES = ["Admin", "User", "Viewer"]
 
 interface TeamMembersTableProps {
+  teamMembers: TeamMember[]
   onInviteClick: () => void
   isLoading?: boolean
 }
 
-export function TeamMembersTable({ onInviteClick, isLoading = false }: TeamMembersTableProps) {
-  const [members, setMembers] = useState<TeamMember[]>(mockTeamMembers)
+export function TeamMembersTable({ teamMembers, onInviteClick, isLoading = false }: TeamMembersTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<TeamMember | null>(null)
 
-  const filteredMembers = members.filter(
+  const filteredMembers = teamMembers.filter(
     (member) =>
       member.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.role.toLowerCase().includes(searchTerm.toLowerCase()),
   )
-
-  const handleRoleChange = (memberId: string, newRole: string) => {
-    setMembers(members.map((m) => (m.id === memberId ? { ...m, role: newRole } : m)))
-    setEditingMember(null)
-  }
-
-  const handleRemoveMember = (memberId: string) => {
-    setMembers(members.filter((m) => m.id !== memberId))
-    setShowRemoveConfirm(null)
-  }
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role.toLowerCase()) {
@@ -221,7 +211,7 @@ export function TeamMembersTable({ onInviteClick, isLoading = false }: TeamMembe
               defaultValue={editingMember?.role}
               onValueChange={(newRole) => {
                 if (editingMember) {
-                  handleRoleChange(editingMember.id, newRole)
+                  // handleRoleChange(editingMember.id, newRole)
                 }
               }}
             >
@@ -261,7 +251,9 @@ export function TeamMembersTable({ onInviteClick, isLoading = false }: TeamMembe
             <Button
               variant="destructive"
               onClick={() => {
-                if (showRemoveConfirm) handleRemoveMember(showRemoveConfirm.id)
+                if (showRemoveConfirm) {
+                  // handleRemoveMember(showRemoveConfirm.id)
+                }
               }}
             >
               Remove Member

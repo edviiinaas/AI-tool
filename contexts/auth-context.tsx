@@ -92,8 +92,8 @@ function checkRateLimit(email: string): boolean {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isVerificationPending, setIsVerificationPending] = useState(false) // Mock state
-  const [pendingUserEmail, setPendingUserEmail] = useState<string | null>(null) // Mock state
+  const [isVerificationPending, setIsVerificationPending] = useState(false)
+  const [pendingUserEmail, setPendingUserEmail] = useState<string | null>(null)
   const router = useRouter()
   const pathname = usePathname()
   const { toast } = useToast()
@@ -115,27 +115,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const handleRedirects = (sessionUser: SupabaseUser | null | undefined) => {
       const isAuthPage = pathname.startsWith("/auth/")
-      const isAppPage = pathname.startsWith("/app/") || pathname === "/app" || pathname.startsWith("/onboarding")
-
+      // Only redirect from auth pages
       if (sessionUser) {
-        // User is authenticated
+        const onboardingCompleted = sessionUser.user_metadata?.onboarding_completed
         if (isAuthPage) {
-          // If on /auth/login, /auth/signup etc.
-          const onboardingCompleted = sessionUser.user_metadata?.onboarding_completed
           if (!onboardingCompleted) {
             router.push("/onboarding")
           } else {
             router.push("/app")
           }
         }
-        // No redirect if on landing page ('/'), /app/*, or /onboarding/*
+        // Do not redirect from /app, /onboarding, or landing page
       } else {
         // User is not authenticated
-        if (isAppPage) {
-          // If trying to access protected /app or /onboarding routes
+        if (isAuthPage) return // Stay on auth pages
+        if (pathname.startsWith("/app") || pathname.startsWith("/onboarding")) {
           router.push("/auth/login")
         }
-        // No redirect if on landing page ('/') or auth pages
       }
     }
 
@@ -204,38 +200,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (email: string, pass: string, fullName?: string, companyName?: string) => {
     setIsLoading(true)
-
-    // Validate password
-    const { isValid, errors } = validatePassword(pass)
-    if (!isValid) {
-      const error = new AuthError(errors.join("\n"), 400)
-      toast({ title: "Signup Failed", description: error.message, variant: "destructive" })
-      setIsLoading(false)
-      return { error }
-    }
-
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password: pass,
       options: {
         data: {
           full_name: fullName,
           company_name: companyName,
-          plan: "starter",
           onboarding_completed: false,
+          plan: "starter",
         },
       },
     })
     setIsLoading(false)
     if (error) {
       toast({ title: "Signup Failed", description: error.message, variant: "destructive" })
-    } else if (data.user && data.user.identities && data.user.identities.length === 0) {
-      toast({
-        title: "Signup Almost Complete!",
-        description: "Please check your email to verify your account before logging in.",
-      })
     } else {
-      toast({ title: "Signup Successful!", description: "Please check your email to verify your account." })
+      toast({ title: "Signup Successful", description: "Please check your email to verify your account." })
     }
     return { error }
   }
@@ -247,97 +228,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) {
       toast({ title: "Logout Failed", description: error.message, variant: "destructive" })
     } else {
-      setUser(null)
-      toast({ title: "Logged Out", description: "You have been successfully logged out." })
-      // Redirect to /auth/login is handled by onAuthStateChange via handleRedirects
-      // Explicit push can be redundant but ensures immediate navigation if listener is slow
-      if (pathname !== "/auth/login") router.push("/auth/login")
+      toast({ title: "Logged Out", description: "You have been logged out successfully." })
     }
   }
 
   const requestPasswordReset = async (email: string) => {
     setIsLoading(true)
-    const resetUrl = `${window.location.origin}/auth/reset-password`
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: resetUrl,
-    })
-    setIsLoading(false)
-    return { error } // Form will show toast
-  }
-
-  const updateUserMetadata = async (metadata: Partial<User>) => {
-    setIsLoading(true)
-    const { data, error } = await supabase.auth.updateUser({ data: metadata })
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
     setIsLoading(false)
     if (error) {
-      toast({ title: "Update Failed", description: error.message, variant: "destructive" })
-    } else if (data.user) {
-      setUser(mapSupabaseUserToAppUser(data.user))
-      toast({ title: "Profile Updated", description: "Your information has been saved." })
+      toast({ title: "Reset Failed", description: error.message, variant: "destructive" })
+    } else {
+      toast({ title: "Reset Link Sent", description: "Please check your email for the reset link." })
     }
     return { error }
   }
 
-  // Mock verifyEmail and resendVerificationCode for now, as they were not fully implemented with Supabase
+  const updateUserMetadata = async (metadata: Partial<User>) => {
+    setIsLoading(true)
+    const { error } = await supabase.auth.updateUser({
+      data: metadata,
+    })
+    setIsLoading(false)
+    if (error) {
+      toast({ title: "Update Failed", description: error.message, variant: "destructive" })
+    } else {
+      toast({ title: "Profile Updated", description: "Your profile has been updated successfully." })
+    }
+    return { error }
+  }
+
   const verifyEmail = async (code: string) => {
     setIsLoading(true)
-    // This is a placeholder. Real Supabase email verification happens via a link.
-    // If you have a custom OTP flow, implement it here.
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API call
-    console.warn("Mock verifyEmail called. Implement with Supabase if using custom OTP flow.")
-    // For now, let's assume verification is successful for mock purposes
-    // and redirect to onboarding. In a real scenario, Supabase handles this.
-    // If user was pending, update their state and redirect.
-    const tempUser = {
-      email: pendingUserEmail || "test@example.com",
-      id: "temp-id",
-      onboardingCompleted: false,
-      plan: "starter",
-    } as User
-    setUser(tempUser)
-    localStorage.setItem("authUser_aic", JSON.stringify(tempUser)) // Mock persistence
-    setIsVerificationPending(false)
-    setPendingUserEmail(null)
-    localStorage.removeItem("pendingUser_aic") // Mock cleanup
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: code,
+      type: "email",
+    })
     setIsLoading(false)
-    toast({ title: "Email Verified (Mock)", description: "Redirecting to onboarding." })
-    router.push("/onboarding")
+    if (error) {
+      toast({ title: "Verification Failed", description: error.message, variant: "destructive" })
+    } else {
+      toast({ title: "Email Verified", description: "Your email has been verified successfully." })
+    }
   }
 
   const resendVerificationCode = async () => {
     setIsLoading(true)
-    // Placeholder for resending verification if using custom OTPs.
-    // Supabase's default flow doesn't usually need this client-side.
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    console.warn("Mock resendVerificationCode called.")
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: pendingUserEmail || "",
+    })
     setIsLoading(false)
-    toast({ title: "Verification Resent (Mock)", description: "A new code has been sent (mock)." })
+    if (error) {
+      toast({ title: "Resend Failed", description: error.message, variant: "destructive" })
+    } else {
+      toast({ title: "Verification Code Resent", description: "Please check your email." })
+    }
   }
 
   const getCurrentUser = () => {
     return user
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isVerificationPending,
-        pendingUserEmail,
-        login,
-        signup,
-        logout,
-        requestPasswordReset,
-        updateUserMetadata,
-        verifyEmail,
-        resendVerificationCode,
-        getCurrentUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
+  const value = {
+    user,
+    isLoading,
+    isVerificationPending,
+    pendingUserEmail,
+    login,
+    signup,
+    logout,
+    requestPasswordReset,
+    updateUserMetadata,
+    verifyEmail,
+    resendVerificationCode,
+    getCurrentUser,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export const useAuth = () => {

@@ -5,10 +5,10 @@ import { StatCard } from "@/components/app/dashboard/stat-card"
 import { RecentActivityFeed } from "@/components/app/dashboard/recent-activity-feed"
 import { AgentUsageChart } from "@/components/app/dashboard/agent-usage-chart"
 import { QuickAccessLinks } from "@/components/app/dashboard/quick-access-links"
-import { mockDashboardStats } from "@/lib/mock-data"
-import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/auth-context"
 import { Briefcase, BarChartBig, Users, FolderKanban } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { supabase } from "@/lib/supabase"
 
 // Import Skeleton Components
 import { StatCardSkeleton } from "@/components/app/dashboard/skeletons/stat-card-skeleton"
@@ -19,14 +19,36 @@ import { QuickAccessSkeleton } from "@/components/app/dashboard/skeletons/quick-
 export default function DashboardPageClient() {
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    activeProjects: 0,
+    analysesCompleted: 0,
+    teamMembers: 0,
+    knowledgeDocs: 0,
+  })
 
   useEffect(() => {
-    // Simulate data fetching
-    const timer = setTimeout(() => {
+    if (!user) return
+    setIsLoading(true)
+    // Fetch all stats in parallel, filtered by user
+    Promise.all([
+      // 1. Active Projects/Chats
+      supabase.from("projects").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      // 2. Analyses Completed
+      supabase.from("analyses").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      // 3. Team Members (if you have a workspace, filter by workspace_id)
+      supabase.from("users").select("id", { count: "exact", head: true }), // No user_id filter for users table
+      // 4. Knowledge Docs
+      supabase.from("knowledge").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    ]).then((results) => {
+      setStats({
+        activeProjects: results[0].count ?? 0,
+        analysesCompleted: results[1].count ?? 0,
+        teamMembers: results[2].count ?? 0,
+        knowledgeDocs: results[3].count ?? 0,
+      })
       setIsLoading(false)
-    }, 1500) // Simulate 1.5 seconds loading time
-    return () => clearTimeout(timer)
-  }, [])
+    })
+  }, [user])
 
   return (
     <div className="space-y-8">
@@ -66,25 +88,25 @@ export default function DashboardPageClient() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard
               title="Active Projects / Chats"
-              value={mockDashboardStats.activeProjects}
+              value={stats.activeProjects}
               icon={Briefcase}
               description="Ongoing conversations & projects"
             />
             <StatCard
               title="Analyses Completed"
-              value={mockDashboardStats.analysesCompleted}
+              value={stats.analysesCompleted}
               icon={BarChartBig}
               description="Total AI analyses performed"
             />
             <StatCard
               title="Team Members"
-              value={mockDashboardStats.teamMembers}
+              value={stats.teamMembers}
               icon={Users}
               description="Active users in your workspace"
             />
             <StatCard
               title="Knowledge Docs"
-              value={mockDashboardStats.knowledgeDocs}
+              value={stats.knowledgeDocs}
               icon={FolderKanban}
               description="Documents in your knowledge base"
             />

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, Trash2, Mail, Send } from "lucide-react"
-import { mockPendingInvitations } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
@@ -20,12 +19,13 @@ import {
 type Invitation = (typeof mockPendingInvitations)[0]
 
 interface PendingInvitationsTableProps {
+  invitations: Invitation[]
   newInvitation: { email: string; role: string } | null
   onClearNewInvitation: () => void
+  isLoading?: boolean
 }
 
-export function PendingInvitationsTable({ newInvitation, onClearNewInvitation }: PendingInvitationsTableProps) {
-  const [invitations, setInvitations] = useState<Invitation[]>(mockPendingInvitations)
+export function PendingInvitationsTable({ invitations, newInvitation, onClearNewInvitation, isLoading = false }: PendingInvitationsTableProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<Invitation | null>(null)
 
   useEffect(() => {
@@ -39,11 +39,6 @@ export function PendingInvitationsTable({ newInvitation, onClearNewInvitation }:
       onClearNewInvitation()
     }
   }, [newInvitation, onClearNewInvitation])
-
-  const handleRemoveInvitation = (id: string) => {
-    setInvitations(invitations.filter((inv) => inv.id !== id))
-    setShowRemoveConfirm(null)
-  }
 
   return (
     <>

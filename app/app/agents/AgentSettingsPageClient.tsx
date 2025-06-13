@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth-context" // To get user plan
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Info } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 // Helper to get initial configs, simulating fetching from a backend
 const getInitialAgentConfigs = (): AgentConfig[] => {
@@ -30,6 +31,50 @@ const getInitialAgentConfigs = (): AgentConfig[] => {
       isEnabled: defaultConfig?.isEnabled !== undefined ? defaultConfig.isEnabled : true,
     }
   })
+}
+
+interface ProfileSettingsFormProps {
+  user: {
+    id: string;
+    fullName: string;
+    email: string;
+    companyName: string;
+  };
+  onSave: (data: Partial<{
+    id: string;
+    fullName: string;
+    email: string;
+    companyName: string;
+  }>) => void;
+}
+
+export function ProfileSettingsForm({ user, onSave }: ProfileSettingsFormProps) {
+  // ...use user and onSave instead of context...
+}
+
+interface SettingsTabsProps {
+  tabs: { value: string; label: string; component: React.ReactNode }[];
+  activeTab: string;
+  onTabChange: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export function SettingsTabs({ tabs, activeTab, onTabChange }: SettingsTabsProps) {
+  return (
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-10 mb-6">
+        {tabs.map(tab => (
+          <TabsTrigger key={tab.value} value={tab.value} className="py-2 sm:py-0">
+            {tab.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {tabs.map(tab => (
+        <TabsContent key={tab.value} value={tab.value}>
+          {tab.component}
+        </TabsContent>
+      ))}
+    </Tabs>
+  )
 }
 
 export default function AgentSettingsPageClient() {

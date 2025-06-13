@@ -6,28 +6,23 @@ import { ProfileSettingsForm } from "@/components/app/settings/profile-settings-
 import { SecuritySettingsForm } from "@/components/app/settings/security-settings-form"
 import { NotificationSettingsForm } from "@/components/app/settings/notification-settings-form" // Import
 import { ApiKeysSettingsForm } from "@/components/app/settings/api-keys-settings-form"
-
-// Mock user data for demonstration
-const mockUser = {
-  id: "user_123",
-  fullName: "John Doe",
-  email: "john.doe@example.com",
-  companyName: "BuildCraft Inc.",
-  // Add other relevant fields
-}
+import { useAuth } from "@/contexts/auth-context"
 
 export default function SettingsPageClient() {
   const [activeTab, setActiveTab] = useState("profile")
-  const [user, setUser] = useState(mockUser) // In a real app, this would come from AuthContext or props
+  const { user, updateUserMetadata } = useAuth()
 
-  const handleSaveProfile = (data: Partial<typeof mockUser>) => {
-    setUser((prev) => ({ ...prev, ...data }))
-    // Here you would typically call an API to save the data
-    console.log("Profile data saved:", data)
+  const handleSaveProfile = (data: Partial<NonNullable<typeof user>>) => {
+    if (!user) return
+    updateUserMetadata(data)
+  }
+
+  if (!user) {
+    return <div>Loading user...</div>
   }
 
   const tabs = [
-    { value: "profile", label: "Profile", component: <ProfileSettingsForm user={user} onSave={handleSaveProfile} /> },
+    { value: "profile", label: "Profile", component: <ProfileSettingsForm user={user as any} onSave={handleSaveProfile} /> },
     { value: "security", label: "Security", component: <SecuritySettingsForm /> },
     { value: "notifications", label: "Notifications", component: <NotificationSettingsForm /> }, // Added
     { value: "apiKeys", label: "API Keys", component: <ApiKeysSettingsForm /> },

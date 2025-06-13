@@ -22,8 +22,10 @@ interface ChatMessageProps {
 export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, onCancelEdit }: ChatMessageProps) {
   const isUser = message.sender === "user"
   const isSystem = message.sender === "system"
-  const agentDetails = !isUser && !isSystem ? AGENTS.find((a) => a.id === message.sender) : null
-  const AgentIcon = agentDetails ? agentDetails.avatar : Bot
+  const agentDetails = message.sender === "agent" && message.agentId
+    ? AGENTS.find((a) => a.id === message.agentId)
+    : null
+  const AgentIcon = agentDetails ? agentDetails.icon : Bot
 
   const [copied, setCopied] = useState(false)
   const [editedText, setEditedText] = useState(message.text)
@@ -54,7 +56,7 @@ export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, on
 
   const getFileIcon = (fileType?: "pdf" | "excel" | "csv" | "image") => {
     if (!fileType) return FileText
-    return FILE_ICONS[fileType] || FileText
+    return FILE_ICONS[fileType] || FILE_ICONS.default
   }
 
   const renderMessageStatus = () => {
@@ -106,7 +108,7 @@ export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, on
       {!isUser && (
         <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border">
           {agentDetails ? (
-            <AgentIcon className="h-full w-full p-1.5" style={{ color: agentDetails.themeColor }} />
+            <AgentIcon className="h-full w-full p-1.5" style={{ color: agentDetails.color }} />
           ) : (
             <Bot className="h-full w-full p-1.5 text-muted-foreground" />
           )}
@@ -114,7 +116,7 @@ export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, on
       )}
       <div className={cn("max-w-[75%] flex flex-col", isUser ? "items-end" : "items-start")}>
         {!isUser && agentDetails && (
-          <div className="text-xs font-medium mb-0.5" style={{ color: agentDetails.themeColor }}>
+          <div className="text-xs font-medium mb-0.5" style={{ color: agentDetails.color }}>
             {agentDetails.name}
           </div>
         )}
@@ -135,7 +137,7 @@ export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, on
             {isUser && onEditMessage && onStartEdit && (
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 className="h-6 w-6 text-xs p-1 hover:bg-black/10 dark:hover:bg-white/10"
                 onClick={() => onStartEdit(message.id, message.text)}
                 aria-label="Edit message"
@@ -147,7 +149,7 @@ export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, on
             )}
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               className="h-6 w-6 text-xs p-1 hover:bg-black/10 dark:hover:bg-white/10"
               onClick={handleCopy}
               aria-label="Copy message"
@@ -198,12 +200,12 @@ export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, on
                 className="min-h-[40px] w-full text-sm bg-inherit p-0 border-none focus-visible:ring-0 resize-none leading-relaxed"
               />
               <div className="mt-1.5 flex justify-end gap-1.5">
-                <Button variant="ghost" size="xs" onClick={onCancelEdit} className="text-xs h-6 px-1.5">
+                <Button variant="ghost" size="sm" onClick={onCancelEdit} className="text-xs h-6 px-1.5">
                   <X className="h-3.5 w-3.5 mr-1" /> Cancel
                 </Button>
                 <Button
                   variant="secondary"
-                  size="xs"
+                  size="sm"
                   onClick={handleSaveEdit}
                   disabled={editedText.trim() === "" || editedText.trim() === message.text.trim()}
                   className="text-xs h-6 px-1.5"
@@ -213,28 +215,29 @@ export function ChatMessage({ message, onEditMessage, isEditing, onStartEdit, on
               </div>
             </div>
           ) : (
-            <ReactMarkdown
-              className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
-              components={{
-                h1: ({ node, ...props }) => <h1 className="text-xl font-bold my-2" {...props} />,
-                h2: ({ node, ...props }) => <h2 className="text-lg font-semibold my-1.5" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="text-md font-medium my-1" {...props} />,
-                ul: ({ node, ...props }) => <ul className="list-disc list-inside my-1 space-y-0.5 pl-1" {...props} />,
-                ol: ({ node, ...props }) => (
-                  <ol className="list-decimal list-inside my-1 space-y-0.5 pl-1" {...props} />
-                ),
-                a: ({ node, ...props }) => (
-                  <a
-                    className="text-primary underline hover:text-primary/80"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    {...props}
-                  />
-                ),
-              }}
-            >
-              {message.text}
-            </ReactMarkdown>
+            <div className="prose prose-sm dark:prose-invert break-words max-w-none">
+              <ReactMarkdown
+                components={{
+                  h1: ({ node, ...props }) => <h1 className="text-xl font-bold my-2" {...props} />,
+                  h2: ({ node, ...props }) => <h2 className="text-lg font-semibold my-1.5" {...props} />,
+                  h3: ({ node, ...props }) => <h3 className="text-md font-medium my-1" {...props} />,
+                  ul: ({ node, ...props }) => <ul className="list-disc list-inside my-1 space-y-0.5 pl-1" {...props} />,
+                  ol: ({ node, ...props }) => (
+                    <ol className="list-decimal list-inside my-1 space-y-0.5 pl-1" {...props} />
+                  ),
+                  a: ({ node, ...props }) => (
+                    <a
+                      className="text-primary underline hover:text-primary/80"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      {...props}
+                    />
+                  ),
+                }}
+              >
+                {message.text}
+              </ReactMarkdown>
+            </div>
           )}
         </div>
         <div

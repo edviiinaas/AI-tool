@@ -16,6 +16,7 @@ import {
   FileSpreadsheet,
   FileBarChart,
   FileQuestion,
+  Image as ImageIcon,
 } from "lucide-react"
 import type { Feature, HowItWorksStep, PricingTier, Testimonial, NotificationPreference } from "./types"
 
@@ -221,6 +222,7 @@ export const FILE_ICONS = {
   pdf: FileText,
   excel: FileSpreadsheet,
   csv: FileBarChart,
+  image: ImageIcon,
   default: FileQuestion,
 }
 
