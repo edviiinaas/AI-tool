@@ -18,12 +18,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null
 }
 
-export function AgentUsageChart() {
+export function AgentUsageChart({ range = 'month' }: { range?: 'month' | 'week' | 'all' }) {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>AI Agent Usage</CardTitle>
-        <CardDescription>Breakdown of AI agent activity this month.</CardDescription>
+        <CardDescription>Breakdown of AI agent activity ({range === 'all' ? 'all time' : range}).</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         {mockAgentUsage.length > 0 ? (

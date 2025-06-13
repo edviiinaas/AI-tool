@@ -1,14 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { StatCard } from "@/components/app/dashboard/stat-card"
 import { RecentActivityFeed } from "@/components/app/dashboard/recent-activity-feed"
 import { AgentUsageChart } from "@/components/app/dashboard/agent-usage-chart"
 import { QuickAccessLinks } from "@/components/app/dashboard/quick-access-links"
 import { useAuth } from "@/contexts/auth-context"
-import { Briefcase, BarChartBig, Users, FolderKanban } from "lucide-react"
+import { Briefcase, BarChartBig, Users, FolderKanban, Plus, UploadCloud, UserPlus } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { supabase } from "@/lib/supabase"
+import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "@/components/ui/button"
 
 // Import Skeleton Components
 import { StatCardSkeleton } from "@/components/app/dashboard/skeletons/stat-card-skeleton"
@@ -25,6 +27,8 @@ export default function DashboardPageClient() {
     teamMembers: 0,
     knowledgeDocs: 0,
   })
+  const [usageRange, setUsageRange] = useState<'month' | 'week' | 'all'>('month')
+  const mainRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!user) return
@@ -51,83 +55,84 @@ export default function DashboardPageClient() {
   }, [user])
 
   return (
-    <div data-tour="dashboard" className="space-y-8">
-      {isLoading ? (
-        <>
-          <div>
-            <Separator className="mb-8" /> {/* Separator is outside conditional rendering */}
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <StatCardSkeleton key={i} />
-            ))}
-          </div>
-          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <RecentActivitySkeleton />
-            </div>
-            <div className="lg:col-span-1">
-              <AgentUsageChartSkeleton />
-            </div>
-          </div>
-          <div>
-            <QuickAccessSkeleton />
-          </div>
-        </>
-      ) : (
-        <>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-primary dark:text-primary-foreground/90">
-              Welcome back, {user?.fullName?.split(" ")[0] || "User"}!
-            </h1>
-            <p className="text-muted-foreground">Here's an overview of your AIConstruct workspace.</p>
-          </div>
-          <Separator />
-
-          {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div data-tour="dashboard" ref={mainRef} className="space-y-6 px-2 sm:px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 pt-4 pb-2">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-primary dark:text-primary-foreground/90 mb-1">
+            Welcome back, {user?.fullName?.split(" ")[0] || "User"}!
+          </h1>
+          <p className="text-muted-foreground text-sm">Here's an overview of your AIConstruct workspace.</p>
+        </div>
+        <div className="flex gap-2 mt-2 sm:mt-0">
+          <Button variant="default" size="sm" className="gap-1"><Plus className="h-4 w-4" /> New Project</Button>
+          <Button variant="outline" size="sm" className="gap-1"><UploadCloud className="h-4 w-4" /> Upload Doc</Button>
+          <Button variant="outline" size="sm" className="gap-1"><UserPlus className="h-4 w-4" /> Invite</Button>
+        </div>
+      </div>
+      <Separator className="mb-2" />
+      {/* Stats Grid */}
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        {[
+          { title: "Active Projects / Chats", value: stats.activeProjects, icon: Briefcase, description: "Ongoing conversations & projects" },
+          { title: "Analyses Completed", value: stats.analysesCompleted, icon: BarChartBig, description: "Total AI analyses performed" },
+          { title: "Team Members", value: stats.teamMembers, icon: Users, description: "Active users in your workspace" },
+          { title: "Knowledge Docs", value: stats.knowledgeDocs, icon: FolderKanban, description: "Documents in your knowledge base" },
+        ].map((card, i) => (
+          <motion.div key={card.title} whileHover={{ scale: 1.03, boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
             <StatCard
-              title="Active Projects / Chats"
-              value={stats.activeProjects}
-              icon={Briefcase}
-              description="Ongoing conversations & projects"
+              title={card.title}
+              value={<AnimatedCounter value={card.value} />}
+              icon={card.icon}
+              description={card.description}
+              className="transition-all duration-200"
             />
-            <StatCard
-              title="Analyses Completed"
-              value={stats.analysesCompleted}
-              icon={BarChartBig}
-              description="Total AI analyses performed"
-            />
-            <StatCard
-              title="Team Members"
-              value={stats.teamMembers}
-              icon={Users}
-              description="Active users in your workspace"
-            />
-            <StatCard
-              title="Knowledge Docs"
-              value={stats.knowledgeDocs}
-              icon={FolderKanban}
-              description="Documents in your knowledge base"
-            />
-          </div>
-
-          {/* Main Dashboard Layout: Activity Feed and Agent Usage */}
-          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <RecentActivityFeed />
-            </div>
-            <div className="lg:col-span-1">
-              <AgentUsageChart />
+          </motion.div>
+        ))}
+      </div>
+      {/* Main Dashboard Layout: Activity Feed and Agent Usage */}
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3 items-start">
+        <div className="lg:col-span-2">
+          <RecentActivityFeed />
+        </div>
+        <div className="lg:col-span-1 flex flex-col gap-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-medium text-sm">AI Agent Usage</span>
+            <div className="flex gap-1">
+              {(['month','week','all'] as const).map(r => (
+                <Button key={r} size="sm" variant={usageRange===r?"default":"ghost"} onClick={()=>setUsageRange(r)}>{r.charAt(0).toUpperCase()+r.slice(1)}</Button>
+              ))}
             </div>
           </div>
-
-          {/* Quick Access */}
-          <div>
-            <QuickAccessLinks />
-          </div>
-        </>
-      )}
+          <AgentUsageChart range={usageRange} />
+        </div>
+      </div>
+      {/* Quick Access */}
+      <div className="mt-2">
+        <QuickAccessLinks />
+      </div>
     </div>
   )
+}
+
+// AnimatedCounter component
+function AnimatedCounter({ value }: { value: number }) {
+  const [display, setDisplay] = useState(0)
+  useEffect(() => {
+    let start = display
+    let end = value
+    if (start === end) return
+    let raf: number
+    const step = () => {
+      start += Math.ceil((end - start) / 8)
+      if ((end > display && start >= end) || (end < display && start <= end)) {
+        setDisplay(end)
+        return
+      }
+      setDisplay(start)
+      raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+  return <span>{display}</span>
 }
