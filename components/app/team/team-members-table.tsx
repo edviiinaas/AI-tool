@@ -44,12 +44,13 @@ export function TeamMembersTable({ teamMembers, onInviteClick, isLoading = false
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<TeamMember | null>(null)
 
-  const filteredMembers = teamMembers.filter(
-    (member) =>
-      member.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.role.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filteredMembers = teamMembers.filter((member) => {
+    const searchTermLower = searchTerm.toLowerCase()
+    const nameMatch = member.fullName?.toLowerCase().includes(searchTermLower) || false
+    const emailMatch = member.email?.toLowerCase().includes(searchTermLower) || false
+    const roleMatch = member.role.toLowerCase().includes(searchTermLower)
+    return nameMatch || emailMatch || roleMatch
+  })
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role.toLowerCase()) {
@@ -122,14 +123,14 @@ export function TeamMembersTable({ teamMembers, onInviteClick, isLoading = false
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
                           <AvatarImage
-                            src={`/placeholder.svg?width=36&height=36&query=${member.fullName?.charAt(0) || member.email.charAt(0)}`}
-                            alt={member.fullName || member.email}
+                            src={`/placeholder.svg?width=36&height=36&query=${member.fullName?.charAt(0) || member.email?.charAt(0) || 'U'}`}
+                            alt={member.fullName || member.email || 'User'}
                           />
-                          <AvatarFallback>{(member.fullName || member.email).charAt(0).toUpperCase()}</AvatarFallback>
+                          <AvatarFallback>{(member.fullName || member.email || 'U').charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-medium">{member.fullName || "N/A"}</div>
-                          <div className="text-sm text-muted-foreground">{member.email}</div>
+                          <div className="text-sm text-muted-foreground">{member.email || "No email"}</div>
                         </div>
                       </div>
                     </TableCell>
