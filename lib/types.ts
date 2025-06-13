@@ -110,7 +110,9 @@ export interface PricingTier {
   features: string[]
   buttonText: string
   isFeatured: boolean
-  highlight?: boolean // Optional highlight property for UI
+  highlight?: boolean
+  agentsIncluded?: string
+  priceSuffix?: string
 }
 
 // For onboarding
