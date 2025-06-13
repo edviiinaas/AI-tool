@@ -14,8 +14,12 @@ import { useAuth } from "@/contexts/auth-context"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 
-export function ProfileSettingsForm() {
-  const { user, updateUserMetadata } = useAuth()
+interface ProfileSettingsFormProps {
+  user: any;
+  onSave: (data: Partial<any>) => Promise<{ error?: any }>;
+}
+
+export function ProfileSettingsForm({ user, onSave }: ProfileSettingsFormProps) {
   const { toast: useToastToast } = useToast()
   const { addNotification } = useNotificationSystem()
 
@@ -47,7 +51,7 @@ export function ProfileSettingsForm() {
         const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath)
         newAvatarUrl = publicUrl
       }
-      const { error: metaError } = await updateUserMetadata({ fullName, avatarUrl: newAvatarUrl })
+      const { error: metaError } = await onSave({ fullName, avatarUrl: newAvatarUrl })
       if (metaError) throw metaError
       toast.success("Profile updated!")
       addNotification({
