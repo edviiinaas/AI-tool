@@ -1,21 +1,14 @@
-import { createClient } from "@supabase/supabase-js"
-import type { Database } from "./database.types" // We'll generate this next
-import { ENV } from "./env"
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
-// Environment variable configuration
-const getRequiredEnvVar = (name: string): string => {
-  const value = process.env[name]
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`)
-  }
-  return value
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error("Missing Supabase environment variables");
 }
 
-const supabaseUrl = getRequiredEnvVar("NEXT_PUBLIC_SUPABASE_URL")
-const supabaseAnonKey = getRequiredEnvVar("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-
-// Use the Database type generic for type safety
 export const supabase = createClient<Database>(
-  ENV.SUPABASE_URL,
-  ENV.SUPABASE_ANON_KEY
-)
+  supabaseUrl,
+  supabaseAnonKey
+);
