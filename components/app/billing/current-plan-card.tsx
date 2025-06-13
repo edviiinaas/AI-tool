@@ -29,8 +29,7 @@ export function CurrentPlanCard() {
         <CardContent className="space-y-6">
           <div>
             <h3 className="text-xl font-semibold text-foreground">
-              {currentPlan.name} - {currentPlan.currency}
-              {currentPlan.price}
+              {currentPlan.name} - {currentPlan.price}
               {currentPlan.term}
             </h3>
             <p className="text-sm text-muted-foreground">

@@ -16,7 +16,13 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 
-type Invitation = (typeof mockPendingInvitations)[0]
+type Invitation = {
+  id: string
+  email: string
+  role: string
+  invitedAt: string
+  // Add other fields as needed from your Supabase invitations table
+}
 
 interface PendingInvitationsTableProps {
   invitations: Invitation[]
@@ -30,12 +36,7 @@ export function PendingInvitationsTable({ invitations, newInvitation, onClearNew
 
   useEffect(() => {
     if (newInvitation) {
-      const newInvite: Invitation = {
-        id: `invite_${Date.now()}`,
-        ...newInvitation,
-        invitedAt: new Date().toISOString(),
-      }
-      setInvitations((prev) => [newInvite, ...prev])
+      // Optionally, you could trigger a refetch or update parent state here
       onClearNewInvitation()
     }
   }, [newInvitation, onClearNewInvitation])
@@ -122,9 +123,7 @@ export function PendingInvitationsTable({ invitations, newInvitation, onClearNew
             </DialogClose>
             <Button
               variant="destructive"
-              onClick={() => {
-                if (showRemoveConfirm) handleRemoveInvitation(showRemoveConfirm.id)
-              }}
+              onClick={() => setShowRemoveConfirm(null)}
             >
               Revoke Invitation
             </Button>
