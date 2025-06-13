@@ -5,7 +5,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import type { User } from "@/lib/types"
 import { supabase } from "@/lib/supabase"
-import type { AuthError, User as SupabaseUser } from "@supabase/supabase-js"
+import { AuthError, type User as SupabaseUser } from "@supabase/supabase-js"
 import { useToast } from "@/hooks/use-toast"
 
 interface AuthContextType {
@@ -24,6 +24,70 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+// Password validation utilities
+const PASSWORD_REQUIREMENTS = {
+  minLength: 8,
+  hasUpperCase: /[A-Z]/,
+  hasLowerCase: /[a-z]/,
+  hasNumber: /[0-9]/,
+  hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/,
+} as const
+
+function validatePassword(password: string): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+
+  if (password.length < PASSWORD_REQUIREMENTS.minLength) {
+    errors.push(`Password must be at least ${PASSWORD_REQUIREMENTS.minLength} characters long`)
+  }
+  if (!PASSWORD_REQUIREMENTS.hasUpperCase.test(password)) {
+    errors.push("Password must contain at least one uppercase letter")
+  }
+  if (!PASSWORD_REQUIREMENTS.hasLowerCase.test(password)) {
+    errors.push("Password must contain at least one lowercase letter")
+  }
+  if (!PASSWORD_REQUIREMENTS.hasNumber.test(password)) {
+    errors.push("Password must contain at least one number")
+  }
+  if (!PASSWORD_REQUIREMENTS.hasSpecialChar.test(password)) {
+    errors.push("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)")
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  }
+}
+
+// Rate limiting
+const RATE_LIMIT = {
+  maxAttempts: 5,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+}
+
+const loginAttempts = new Map<string, { count: number; resetTime: number }>()
+
+function checkRateLimit(email: string): boolean {
+  const now = Date.now()
+  const attempt = loginAttempts.get(email)
+
+  if (!attempt) {
+    loginAttempts.set(email, { count: 1, resetTime: now + RATE_LIMIT.windowMs })
+    return true
+  }
+
+  if (now > attempt.resetTime) {
+    loginAttempts.set(email, { count: 1, resetTime: now + RATE_LIMIT.windowMs })
+    return true
+  }
+
+  if (attempt.count >= RATE_LIMIT.maxAttempts) {
+    return false
+  }
+
+  attempt.count++
+  return true
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
@@ -110,19 +174,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, pass: string) => {
     setIsLoading(true)
+
+    // Check rate limit
+    if (!checkRateLimit(email)) {
+      const error = new AuthError("Too many login attempts. Please try again later.", 429)
+      toast({ title: "Login Failed", description: error.message, variant: "destructive" })
+      setIsLoading(false)
+      return { error }
+    }
+
+    // Validate password
+    const { isValid, errors } = validatePassword(pass)
+    if (!isValid) {
+      const error = new AuthError(errors.join("\n"), 400)
+      toast({ title: "Login Failed", description: error.message, variant: "destructive" })
+      setIsLoading(false)
+      return { error }
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password: pass })
     setIsLoading(false)
     if (error) {
       toast({ title: "Login Failed", description: error.message, variant: "destructive" })
     } else {
       toast({ title: "Login Successful", description: "Welcome back!" })
-      // Redirects are handled by onAuthStateChange via handleRedirects
     }
     return { error }
   }
 
   const signup = async (email: string, pass: string, fullName?: string, companyName?: string) => {
     setIsLoading(true)
+
+    // Validate password
+    const { isValid, errors } = validatePassword(pass)
+    if (!isValid) {
+      const error = new AuthError(errors.join("\n"), 400)
+      toast({ title: "Signup Failed", description: error.message, variant: "destructive" })
+      setIsLoading(false)
+      return { error }
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password: pass,
@@ -145,7 +236,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
     } else {
       toast({ title: "Signup Successful!", description: "Please check your email to verify your account." })
-      // Redirects to onboarding or app handled by onAuthStateChange via handleRedirects
     }
     return { error }
   }

@@ -1,21 +1,37 @@
 "use client"
 
 import { ChatArea } from "@/components/app/chat-area"
-import type { Conversation, Message } from "@/lib/types"
+import { useChat } from "@/hooks/use-chat" // We'll need to create this hook
+import { Loader2 } from "lucide-react"
 
-// These props are passed down from ClientAppPagesLayout via React.cloneElement
-interface AppPageProps {
-  conversation: Conversation | null
-  messages: Message[]
-  onNewMessage: (conversationId: string, message: Message) => void
-  onAgentResponse: (conversationId: string, agentMessages: Message[]) => void
-  onEditMessage: (conversationId: string, messageId: string, newText: string) => void
-  onUpdateMessageStatus: (conversationId: string, messageId: string, status: Message["status"]) => void
-  isLoadingConversation: boolean
-}
+export default function AppPage() {
+  const { 
+    conversation,
+    messages,
+    onNewMessage,
+    onAgentResponse,
+    onEditMessage,
+    onUpdateMessageStatus,
+    isLoadingConversation 
+  } = useChat()
 
-export default function AppPage(props: AppPageProps) {
-  // The ChatArea component expects these props to function correctly.
-  // When no conversation is selected, it will render its own empty/welcome state.
-  return <ChatArea {...props} />
+  if (isLoadingConversation) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  return (
+    <ChatArea
+      conversation={conversation}
+      messages={messages}
+      onNewMessage={onNewMessage}
+      onAgentResponse={onAgentResponse}
+      onEditMessage={onEditMessage}
+      onUpdateMessageStatus={onUpdateMessageStatus}
+      isLoadingConversation={isLoadingConversation}
+    />
+  )
 }

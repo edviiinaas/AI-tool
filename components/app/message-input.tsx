@@ -76,29 +76,40 @@ export function MessageInput({ onSendMessage, isSending }: MessageInputProps) {
     setUploadProgress(0) // Reset progress
 
     const selectedFile = event.target.files && event.target.files[0]
-    if (selectedFile) {
+    if (!selectedFile) return
+
+    try {
+      // Validate file size
       if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
-        setFileError(`File is too large. Max size: ${MAX_FILE_SIZE_MB}MB.`)
-        toast({
-          title: "Upload Error",
-          description: `File "${selectedFile.name}" is too large. Maximum size is ${MAX_FILE_SIZE_MB}MB.`,
-          variant: "destructive",
-        })
-        resetFileInput()
-        return
+        throw new Error(`File is too large. Maximum size is ${MAX_FILE_SIZE_MB}MB.`)
       }
+
+      // Validate file type
       if (!ALLOWED_FILE_TYPES.includes(selectedFile.type)) {
         const friendlyFileType = selectedFile.name.split(".").pop()?.toUpperCase() || "Unknown type"
-        setFileError(`Invalid file type: ${friendlyFileType}. Allowed: PDF, Excel, CSV, PNG, JPG, GIF.`)
-        toast({
-          title: "Upload Error",
-          description: `File type "${friendlyFileType}" for "${selectedFile.name}" is not supported.`,
-          variant: "destructive",
-        })
-        resetFileInput()
-        return
+        throw new Error(`Invalid file type: ${friendlyFileType}. Allowed types: ${ALLOWED_FILE_TYPES.join(", ")}`)
       }
+
+      // Validate file name
+      if (selectedFile.name.length > 100) {
+        throw new Error("File name is too long. Maximum length is 100 characters.")
+      }
+
+      // Check for potentially malicious file names
+      if (/[<>:"/\\|?*]/.test(selectedFile.name)) {
+        throw new Error("File name contains invalid characters.")
+      }
+
       setFile(selectedFile)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred while processing the file."
+      setFileError(errorMessage)
+      toast({
+        title: "Upload Error",
+        description: errorMessage,
+        variant: "destructive",
+      })
+      resetFileInput()
     }
   }
 

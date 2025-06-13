@@ -12,7 +12,8 @@ export interface User {
   email: string
   fullName?: string
   companyName?: string // Added for onboarding/workspace context
-  plan?: PlanType // User's current plan
+  plan: PlanType // User's current plan
+  onboardingCompleted: boolean
   // Supabase User object might have more fields like 'created_at', 'updated_at'
   // For this app, we primarily care about id and email for identification.
   // Other details might come from a separate 'profiles' table in Supabase.
@@ -63,7 +64,7 @@ export interface MessageFile {
   url?: string // Optional: for direct link or preview
 }
 
-export type MessageSender = "user" | "system" | `agent_${string}`
+export type MessageSender = "user" | "system" | "assistant" | "agent"
 
 export interface Message {
   id: string
