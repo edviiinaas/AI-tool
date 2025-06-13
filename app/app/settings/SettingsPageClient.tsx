@@ -6,6 +6,7 @@ import { ProfileSettingsForm } from "@/components/app/settings/profile-settings-
 import { SecuritySettingsForm } from "@/components/app/settings/security-settings-form"
 import { NotificationSettingsForm } from "@/components/app/settings/notification-settings-form" // Import
 import { ApiKeysSettingsForm } from "@/components/app/settings/api-keys-settings-form"
+import { AppSettingsForm } from "@/components/app/settings/app-settings-form"
 import { useAuth } from "@/contexts/auth-context"
 
 export default function SettingsPageClient() {
@@ -23,8 +24,9 @@ export default function SettingsPageClient() {
 
   const tabs = [
     { value: "profile", label: "Profile", component: <ProfileSettingsForm user={user as any} onSave={handleSaveProfile} /> },
+    { value: "app", label: "App Settings", component: <AppSettingsForm /> },
     { value: "security", label: "Security", component: <SecuritySettingsForm /> },
-    { value: "notifications", label: "Notifications", component: <NotificationSettingsForm /> }, // Added
+    { value: "notifications", label: "Notifications", component: <NotificationSettingsForm /> },
     { value: "apiKeys", label: "API Keys", component: <ApiKeysSettingsForm /> },
   ]
 
