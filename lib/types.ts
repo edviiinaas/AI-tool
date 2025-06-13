@@ -63,9 +63,11 @@ export interface MessageFile {
   url?: string // Optional: for direct link or preview
 }
 
+export type MessageSender = "user" | "system" | `agent_${string}`
+
 export interface Message {
   id: string
-  sender: "user" | "system" | string // "user", "system", or Agent ID
+  sender: MessageSender
   text: string
   timestamp: Date
   file?: MessageFile

@@ -46,36 +46,54 @@ const initialMockNotifications: AppNotification[] = [
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [preferences, setPreferences] = useState<NotificationPreference[]>(() => {
     if (typeof window !== "undefined") {
-      const storedPrefs = localStorage.getItem("notificationPreferences")
-      return storedPrefs ? JSON.parse(storedPrefs) : DEFAULT_NOTIFICATION_PREFERENCES
+      try {
+        const storedPrefs = localStorage.getItem("notificationPreferences")
+        return storedPrefs ? JSON.parse(storedPrefs) : DEFAULT_NOTIFICATION_PREFERENCES
+      } catch (error) {
+        console.error("Error reading notification preferences from localStorage:", error)
+        return DEFAULT_NOTIFICATION_PREFERENCES
+      }
     }
     return DEFAULT_NOTIFICATION_PREFERENCES
   })
   const [desktopPermissionStatus, setDesktopPermissionStatus] = useState<NotificationPermission | "loading">("loading")
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     if (typeof window !== "undefined") {
-      const storedNotifs = localStorage.getItem("appNotifications")
-      return storedNotifs
-        ? JSON.parse(storedNotifs, (key, value) => {
-            if (key === "timestamp" && typeof value === "string") {
-              return new Date(value)
-            }
-            return value
-          })
-        : initialMockNotifications
+      try {
+        const storedNotifs = localStorage.getItem("appNotifications")
+        return storedNotifs
+          ? JSON.parse(storedNotifs, (key, value) => {
+              if (key === "timestamp" && typeof value === "string") {
+                return new Date(value)
+              }
+              return value
+            })
+          : initialMockNotifications
+      } catch (error) {
+        console.error("Error reading notifications from localStorage:", error)
+        return initialMockNotifications
+      }
     }
     return initialMockNotifications
   })
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("notificationPreferences", JSON.stringify(preferences))
+      try {
+        localStorage.setItem("notificationPreferences", JSON.stringify(preferences))
+      } catch (error) {
+        console.error("Error saving notification preferences to localStorage:", error)
+      }
     }
   }, [preferences])
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("appNotifications", JSON.stringify(notifications))
+      try {
+        localStorage.setItem("appNotifications", JSON.stringify(notifications))
+      } catch (error) {
+        console.error("Error saving notifications to localStorage:", error)
+      }
     }
   }, [notifications])
 
