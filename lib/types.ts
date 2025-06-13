@@ -74,6 +74,7 @@ export interface Message {
   timestamp: Date
   file?: MessageFile
   status?: "sending" | "sent" | "delivered" | "failed" // For user messages
+  agentId?: AgentSlug // Optional: for agent messages
   // agentDetails?: Agent; // If we need to store the specific agent snapshot that sent the message
 }
 
