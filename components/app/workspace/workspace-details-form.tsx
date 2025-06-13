@@ -48,6 +48,15 @@ export function WorkspaceDetailsForm() {
     localStorage.setItem("authUser_aic", JSON.stringify(updatedUser))
     // Re-trigger a "login" like action to update the stored user and context.
     // This will also update the AppHeader if it's using user.companyName.
+    if (!updatedUser.email) {
+      toast({
+        title: "Error",
+        description: "User email is required.",
+        variant: "destructive",
+      })
+      setIsSubmitting(false)
+      return
+    }
     await login(updatedUser.email, "")
 
     setIsSubmitting(false)
