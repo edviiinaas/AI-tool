@@ -28,6 +28,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 type TeamMember = User & { role: string; lastActive: string }
 
@@ -121,13 +122,22 @@ export function TeamMembersTable({ teamMembers, onInviteClick, isLoading = false
                   <TableRow key={member.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarImage
-                            src={`/placeholder.svg?width=36&height=36&query=${member.fullName?.charAt(0) || member.email?.charAt(0) || 'U'}`}
-                            alt={member.fullName || member.email || 'User'}
-                          />
-                          <AvatarFallback>{(member.fullName || member.email || 'U').charAt(0).toUpperCase()}</AvatarFallback>
-                        </Avatar>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Avatar className="h-9 w-9">
+                                  <AvatarImage
+                                    src={`/placeholder.svg?width=36&height=36&query=${member.fullName?.charAt(0) || member.email?.charAt(0) || 'U'}`}
+                                    alt={member.fullName || member.email || 'User'}
+                                  />
+                                  <AvatarFallback>{(member.fullName || member.email || 'U').charAt(0).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>{member.fullName || member.email || 'User'}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         <div>
                           <div className="font-medium">{member.fullName || "N/A"}</div>
                           <div className="text-sm text-muted-foreground">{member.email || "No email"}</div>
@@ -140,25 +150,46 @@ export function TeamMembersTable({ teamMembers, onInviteClick, isLoading = false
                     <TableCell className="text-sm text-muted-foreground">{member.lastActive}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <span className="sr-only">Open menu</span>
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>More actions</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => setEditingMember(member)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Role
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                            onClick={() => setShowRemoveConfirm(member)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Remove Member
-                          </DropdownMenuItem>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <DropdownMenuItem onClick={() => setEditingMember(member)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Role
+                                </DropdownMenuItem>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit this member's role</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                                  onClick={() => setShowRemoveConfirm(member)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Remove Member
+                                </DropdownMenuItem>
+                              </TooltipTrigger>
+                              <TooltipContent>Remove this member</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -186,10 +217,19 @@ export function TeamMembersTable({ teamMembers, onInviteClick, isLoading = false
                         </p>
                       </div>
                       {!searchTerm && (
-                        <Button onClick={onInviteClick} className="mt-2">
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          Invite First Member
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Button onClick={onInviteClick} className="mt-2">
+                                  <UserPlus className="mr-2 h-4 w-4" />
+                                  Invite First Member
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>Invite your first team member</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
                     </div>
                   </TableCell>

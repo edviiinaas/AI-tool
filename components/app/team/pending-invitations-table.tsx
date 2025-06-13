@@ -15,6 +15,8 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type Invitation = {
   id: string
@@ -55,7 +57,16 @@ export function PendingInvitationsTable({ invitations, newInvitation, onClearNew
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invitations.length > 0 ? (
+            {isLoading ? (
+              Array(3).fill(0).map((_, i) => (
+                <TableRow key={`skeleton-invite-${i}`}>
+                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                </TableRow>
+              ))
+            ) : invitations.length > 0 ? (
               invitations.map((invitation) => (
                 <TableRow key={invitation.id}>
                   <TableCell className="font-medium">{invitation.email}</TableCell>
@@ -67,24 +78,45 @@ export function PendingInvitationsTable({ invitations, newInvitation, onClearNew
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                          </TooltipTrigger>
+                          <TooltipContent>More actions</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Send className="mr-2 h-4 w-4" />
-                          Resend Invitation
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                          onClick={() => setShowRemoveConfirm(invitation)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Revoke Invitation
-                        </DropdownMenuItem>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuItem>
+                                <Send className="mr-2 h-4 w-4" />
+                                Resend Invitation
+                              </DropdownMenuItem>
+                            </TooltipTrigger>
+                            <TooltipContent>Resend invitation email</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                                onClick={() => setShowRemoveConfirm(invitation)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Revoke Invitation
+                              </DropdownMenuItem>
+                            </TooltipTrigger>
+                            <TooltipContent>Revoke this invitation</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

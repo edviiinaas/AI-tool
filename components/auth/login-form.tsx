@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,10 @@ import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { Loader2, Eye, EyeOff } from "lucide-react"
 import { APP_LOGO, APP_NAME } from "@/lib/constants"
+import { FcGoogle } from "react-icons/fc"
+import { SiMicrosoft } from "react-icons/si"
+import { supabase } from "@/lib/supabase"
+import { FaGithub, FaSlack } from "react-icons/fa"
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -17,6 +21,9 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const { login, isLoading } = useAuth()
+  const [magicEmail, setMagicEmail] = useState("")
+  const [magicStatus, setMagicStatus] = useState<null | "sent" | "error" | "">(null)
+  const [magicError, setMagicError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,6 +39,40 @@ export function LoginForm() {
       setError(authError.message)
     }
     // On success, the AuthContext's onAuthStateChange will handle the redirect.
+  }
+
+  // Social login handler
+  const handleSocialLogin = async (provider: "google" | "azure" | "github" | "slack") => {
+    setError("")
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider })
+      if (error) setError(error.message)
+    } catch (err) {
+      setError((err as Error).message)
+    }
+  }
+
+  // Magic link handler
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMagicStatus(null)
+    setMagicError("")
+    if (!magicEmail) {
+      setMagicError("Please enter your email.")
+      return
+    }
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ email: magicEmail })
+      if (error) {
+        setMagicStatus("error")
+        setMagicError(error.message)
+      } else {
+        setMagicStatus("sent")
+      }
+    } catch (err) {
+      setMagicStatus("error")
+      setMagicError((err as Error).message)
+    }
   }
 
   return (
@@ -86,6 +127,66 @@ export function LoginForm() {
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log In
             </Button>
+          </form>
+          <div className="my-4 flex items-center gap-2">
+            <div className="flex-1 h-px bg-muted-foreground/20" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="flex-1 h-px bg-muted-foreground/20" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center gap-2"
+              onClick={() => handleSocialLogin("google")}
+            >
+              <FcGoogle className="h-5 w-5" /> Continue with Google
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center gap-2"
+              onClick={() => handleSocialLogin("azure")}
+            >
+              <SiMicrosoft className="h-5 w-5 text-[#2F2F2F]" /> Continue with Microsoft
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center gap-2"
+              onClick={() => handleSocialLogin("github")}
+            >
+              <FaGithub className="h-5 w-5" /> Continue with GitHub
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center gap-2"
+              onClick={() => handleSocialLogin("slack")}
+            >
+              <FaSlack className="h-5 w-5 text-[#611f69]" /> Continue with Slack
+            </Button>
+          </div>
+          <div className="my-4 flex items-center gap-2">
+            <div className="flex-1 h-px bg-muted-foreground/20" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="flex-1 h-px bg-muted-foreground/20" />
+          </div>
+          <form onSubmit={handleMagicLink} className="space-y-2">
+            <Label htmlFor="magic-email">Sign in with magic link</Label>
+            <Input
+              id="magic-email"
+              type="email"
+              placeholder="your@email.com"
+              value={magicEmail}
+              onChange={e => setMagicEmail(e.target.value)}
+              disabled={isLoading}
+            />
+            <Button type="submit" variant="secondary" className="w-full" disabled={isLoading}>
+              Send Magic Link
+            </Button>
+            {magicStatus === "sent" && <p className="text-xs text-green-600">Magic link sent! Check your email.</p>}
+            {magicStatus === "error" && <p className="text-xs text-destructive">{magicError}</p>}
           </form>
         </CardContent>
         <CardFooter className="flex flex-col items-center space-y-2 text-sm">

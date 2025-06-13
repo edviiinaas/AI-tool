@@ -10,6 +10,10 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, ShieldCheck, ShieldOff } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
+import { supabase } from "@/lib/supabase"
+import QRCode from "react-qr-code"
 
 export function SecuritySettingsForm() {
   const { toast } = useToast()
@@ -19,8 +23,14 @@ export function SecuritySettingsForm() {
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false)
   const [passwordError, setPasswordError] = useState("")
 
-  const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false) // Mock state
+  const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false)
   const [isTwoFactorSubmitting, setIsTwoFactorSubmitting] = useState(false)
+
+  const [isTOTPEnrolling, setIsTOTPEnrolling] = useState(false)
+  const [totpSecret, setTotpSecret] = useState<string | null>(null)
+  const [totpUri, setTotpUri] = useState<string | null>(null)
+  const [totpCode, setTotpCode] = useState("")
+  const [totpError, setTotpError] = useState("")
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,6 +85,71 @@ export function SecuritySettingsForm() {
     })
   }
 
+  // Start TOTP enrollment
+  const handleStartTOTP = async () => {
+    setIsTOTPEnrolling(true)
+    setTotpError("")
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" })
+      if (error) throw error
+      setTotpSecret(data?.totp?.secret || null)
+      setTotpUri(data?.totp?.uri || null)
+    } catch (err: any) {
+      setTotpError(err.message || "Failed to start 2FA setup.")
+      setIsTOTPEnrolling(false)
+    }
+  }
+
+  // Verify TOTP code
+  const handleVerifyTOTP = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setTotpError("")
+    try {
+      const { error } = await supabase.auth.mfa.verify({ factorType: "totp", code: totpCode })
+      if (error) throw error
+      setIsTwoFactorEnabled(true)
+      setIsTOTPEnrolling(false)
+      setTotpSecret(null)
+      setTotpUri(null)
+      setTotpCode("")
+      toast({ title: "2FA Enabled", description: "Two-factor authentication is now active." })
+    } catch (err: any) {
+      setTotpError(err.message || "Invalid code. Please try again.")
+    }
+  }
+
+  // Remove TOTP
+  const handleRemoveTOTP = async () => {
+    setIsTwoFactorSubmitting(true)
+    setTotpError("")
+    try {
+      const { error } = await supabase.auth.mfa.unenroll({ factorType: "totp" })
+      if (error) throw error
+      setIsTwoFactorEnabled(false)
+      toast({ title: "2FA Disabled", description: "Two-factor authentication has been disabled." })
+    } catch (err: any) {
+      setTotpError(err.message || "Failed to disable 2FA.")
+    } finally {
+      setIsTwoFactorSubmitting(false)
+    }
+  }
+
+  if (isPasswordSubmitting) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+          <CardDescription>Update your account password. Choose a strong, unique password.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-10 w-full mb-4" />
+          <Skeleton className="h-10 w-full mb-4" />
+          <Skeleton className="h-10 w-full mb-4" />
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-8">
       <Card>
@@ -117,10 +192,17 @@ export function SecuritySettingsForm() {
             {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
           </CardContent>
           <CardFooter className="border-t pt-6">
-            <Button type="submit" disabled={isPasswordSubmitting} className="ml-auto">
-              {isPasswordSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Change Password
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button type="submit" disabled={isPasswordSubmitting} className="ml-auto">
+                    {isPasswordSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Change Password
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Change your password</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </CardFooter>
         </form>
       </Card>
@@ -149,31 +231,51 @@ export function SecuritySettingsForm() {
             </div>
             <div className="flex items-center">
               {isTwoFactorSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Switch
-                checked={isTwoFactorEnabled}
-                onCheckedChange={handleToggleTwoFactor}
-                disabled={isTwoFactorSubmitting}
-                aria-label="Toggle Two-Factor Authentication"
-              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Switch
+                      checked={isTwoFactorEnabled}
+                      onCheckedChange={enabled => enabled ? handleStartTOTP() : handleRemoveTOTP()}
+                      disabled={isTwoFactorSubmitting}
+                      aria-label="Toggle Two-Factor Authentication"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Toggle Two-Factor Authentication</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
+          {isTOTPEnrolling && totpUri && (
+            <div className="mt-6 flex flex-col items-center">
+              <p className="mb-2 text-sm">Scan this QR code with your authenticator app:</p>
+              <QRCode value={totpUri} size={160} />
+              <form onSubmit={handleVerifyTOTP} className="mt-4 flex flex-col items-center gap-2 w-full max-w-xs">
+                <Label htmlFor="totp-code">Enter 6-digit code</Label>
+                <Input
+                  id="totp-code"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  value={totpCode}
+                  onChange={e => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  required
+                  autoFocus
+                />
+                <Button type="submit" className="w-full mt-2">Verify & Enable 2FA</Button>
+                {totpError && <p className="text-xs text-destructive mt-1">{totpError}</p>}
+              </form>
+            </div>
+          )}
           {isTwoFactorEnabled && (
             <p className="text-sm text-muted-foreground mt-4">
               You will be asked for a verification code from your authenticator app when you sign in.
-              {/* In a real app, show recovery codes option or manage devices here */}
+              <Button variant="link" className="ml-2 p-0 h-auto text-destructive" onClick={handleRemoveTOTP} disabled={isTwoFactorSubmitting}>Disable 2FA</Button>
             </p>
           )}
+          {totpError && !isTOTPEnrolling && <p className="text-xs text-destructive mt-2">{totpError}</p>}
         </CardContent>
-        {!isTwoFactorEnabled && (
-          <CardFooter className="border-t pt-6">
-            <Button onClick={() => handleToggleTwoFactor(true)} disabled={isTwoFactorSubmitting} variant="outline">
-              {isTwoFactorSubmitting && isTwoFactorEnabled === false ? ( // Check if trying to enable
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Setup Two-Factor Authentication
-            </Button>
-          </CardFooter>
-        )}
       </Card>
     </div>
   )

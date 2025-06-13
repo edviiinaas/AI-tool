@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { mockRecentActivity } from "@/lib/mock-data"
 import { MessageSquare, UploadCloud, BarChart2, UserPlus, BrainCircuit } from "lucide-react"
 import { AGENTS } from "@/lib/constants" // To get agent icons/colors
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import Image from "next/image"
 
 const activityIcons = {
   chat_started: MessageSquare,
@@ -43,13 +45,22 @@ export function RecentActivityFeed() {
 
                 return (
                   <div key={activity.id} className="flex items-start space-x-3">
-                    <Avatar className="h-9 w-9 border">
-                      {agent ? (
-                        <agent.icon className="h-6 w-6" style={{ color: avatarColor }} />
-                      ) : (
-                        <AvatarFallback>{userInitial.toUpperCase()}</AvatarFallback>
-                      )}
-                    </Avatar>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Avatar className="h-9 w-9 border">
+                              {agent ? (
+                                <agent.icon className="h-6 w-6" style={{ color: avatarColor }} />
+                              ) : (
+                                <AvatarFallback>{userInitial.toUpperCase()}</AvatarFallback>
+                              )}
+                            </Avatar>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>{activity.user}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     <div className="flex-1">
                       <p className="text-sm">
                         <span className="font-medium">{activity.user}</span>{" "}
@@ -63,14 +74,35 @@ export function RecentActivityFeed() {
                         - {new Date(activity.timestamp).toLocaleDateString([], { month: "short", day: "numeric" })}
                       </p>
                     </div>
-                    <Icon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Icon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>{activity.type.replace(/_/g, " ")}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 )
               })}
             </div>
           </ScrollArea>
         ) : (
-          <p className="text-sm text-muted-foreground text-center py-10">No recent activity.</p>
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <Image
+              src="/placeholder.svg?width=96&height=96"
+              width={96}
+              height={96}
+              alt="No activity illustration"
+              className="opacity-60"
+            />
+            <h3 className="text-lg font-semibold text-foreground">No Recent Activity</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-xs">
+              When you or your team take actions, they'll show up here for easy tracking.
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>

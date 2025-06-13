@@ -12,6 +12,9 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Database } from "@/types/supabase"
 import { useTheme } from "next-themes"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import Image from "next/image"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface Message {
   id: string
@@ -277,128 +280,180 @@ export function ChatInterface() {
       <ScrollArea ref={scrollRef} className="flex-1 p-2 sm:p-4 max-w-full" onScroll={handleScroll}>
         <div className="space-y-3 sm:space-y-4">
           {isLoadingMore && (
-            <div className="flex justify-center py-2">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <div className="flex flex-col gap-2 py-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-start gap-2 sm:gap-3">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-3 w-1/3" />
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-          {filteredMessages.map((message) => {
-            const isCurrentUser = message.user_id === user?.id
-            const messageReactions = reactionsByMessage[message.id] || []
-            const isUnread = lastReadAt ? new Date(message.created_at) > new Date(lastReadAt) : true
-            return (
-              <div
-                key={message.id}
-                className={cn(
-                  "group flex items-start gap-2 sm:gap-3",
-                  isCurrentUser && "flex-row-reverse"
-                )}
-              >
-                <Avatar className="h-8 w-8 min-w-8">
-                  <AvatarImage src={message.user.avatar_url} />
-                  <AvatarFallback>
-                    {message.user.full_name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+          {filteredMessages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-4">
+              <Image
+                src="/placeholder.svg?width=128&height=128"
+                width={128}
+                height={128}
+                alt="No messages illustration"
+                className="opacity-60"
+              />
+              <h3 className="text-lg font-semibold text-foreground">No Messages Yet</h3>
+              <p className="text-sm text-muted-foreground text-center max-w-xs">
+                Start the conversation by sending a message. Your chat history will appear here.
+              </p>
+            </div>
+          ) : (
+            filteredMessages.map((message) => {
+              const isCurrentUser = message.user_id === user?.id
+              const messageReactions = reactionsByMessage[message.id] || []
+              const isUnread = lastReadAt ? new Date(message.created_at) > new Date(lastReadAt) : true
+              return (
                 <div
+                  key={message.id}
                   className={cn(
-                    "relative rounded-lg px-3 py-2 sm:px-4 sm:py-2 max-w-[85vw] sm:max-w-[80%]",
-                    isCurrentUser
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                    "group flex items-start gap-2 sm:gap-3",
+                    isCurrentUser && "flex-row-reverse"
                   )}
                 >
-                  {editingMessageId === message.id ? (
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault()
-                        editMessage(message.id)
-                      }}
-                      className="flex gap-2"
-                    >
-                      <Input
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        className="h-8"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Escape') {
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Avatar className="h-8 w-8 min-w-8">
+                            <AvatarImage src={message.user.avatar_url} />
+                            <AvatarFallback>
+                              {message.user.full_name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{message.user.full_name}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <div
+                    className={cn(
+                      "relative rounded-lg px-3 py-2 sm:px-4 sm:py-2 max-w-[85vw] sm:max-w-[80%]",
+                      isCurrentUser
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    )}
+                  >
+                    {editingMessageId === message.id ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault()
+                          editMessage(message.id)
+                        }}
+                        className="flex gap-2"
+                      >
+                        <Input
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="h-8"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                              setEditingMessageId(null)
+                              setEditContent("")
+                            }
+                          }}
+                        />
+                        <Button type="submit" size="sm">
+                          Save
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
                             setEditingMessageId(null)
                             setEditContent("")
-                          }
-                        }}
-                      />
-                      <Button type="submit" size="sm">
-                        Save
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingMessageId(null)
-                          setEditContent("")
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </form>
-                  ) : (
-                    <>
-                      {message.file_url && (
-                        <div className="mb-2">
-                          {message.file_type?.startsWith('image/') ? (
-                            <a href={message.file_url} target="_blank" rel="noopener noreferrer">
-                              <img src={message.file_url} alt="attachment" className="max-h-48 rounded" />
-                            </a>
-                          ) : (
-                            <a href={message.file_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                              {message.file_url.split('/').pop()}
-                            </a>
-                          )}
-                        </div>
-                      )}
-                      <p className="text-sm">{message.content}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-xs opacity-70">
-                          {new Date(message.created_at).toLocaleTimeString()}
-                          {message.is_edited && <span className="ml-1 italic text-muted-foreground">(edited)</span>}
-                        </p>
-                        <Button type="button" variant="ghost" size="icon" className="h-5 w-5 ml-2" title="Reply (thread)">
-                          <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M9 17L4 12L9 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 18V16C20 13.7909 18.2091 12 16 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          }}
+                        >
+                          Cancel
                         </Button>
+                      </form>
+                    ) : (
+                      <>
+                        {message.file_url && (
+                          <div className="mb-2">
+                            {message.file_type?.startsWith('image/') ? (
+                              <a href={message.file_url} target="_blank" rel="noopener noreferrer">
+                                <img src={message.file_url} alt="attachment" className="max-h-48 rounded" />
+                              </a>
+                            ) : (
+                              <a href={message.file_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                                {message.file_url.split('/').pop()}
+                              </a>
+                            )}
+                          </div>
+                        )}
+                        <p className="text-sm">{message.content}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs opacity-70">
+                            {new Date(message.created_at).toLocaleTimeString()}
+                            {message.is_edited && <span className="ml-1 italic text-muted-foreground">(edited)</span>}
+                          </p>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button type="button" variant="ghost" size="icon" className="h-5 w-5 ml-2">
+                                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M9 17L4 12L9 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 18V16C20 13.7909 18.2091 12 16 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Reply (thread)</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        {isUnread && <TooltipProvider><Tooltip><TooltipTrigger asChild><div className="w-2 h-2 bg-primary rounded-full absolute -left-3 top-1" /></TooltipTrigger><TooltipContent>Unread</TooltipContent></Tooltip></TooltipProvider>}
+                      </>
+                    )}
+                    {isCurrentUser && !editingMessageId && (
+                      <div className="absolute -right-8 top-0 hidden group-hover:flex gap-1">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => {
+                                  setEditingMessageId(message.id)
+                                  setEditContent(message.content)
+                                }}
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => deleteMessage(message.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
-                      {isUnread && <div className="w-2 h-2 bg-primary rounded-full absolute -left-3 top-1" title="Unread" />}
-                    </>
-                  )}
-                  {isCurrentUser && !editingMessageId && (
-                    <div className="absolute -right-8 top-0 hidden group-hover:flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => {
-                          setEditingMessageId(message.id)
-                          setEditContent(message.content)
-                        }}
-                        title="Edit"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => deleteMessage(message.id)}
-                        title="Delete"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })
+          )}
           {typingUsers.length > 0 && (
             <div className="text-xs text-muted-foreground mt-2">
               {typingUsers.map((u) => u.full_name).join(', ')} typing...
@@ -408,15 +463,22 @@ export function ChatInterface() {
       </ScrollArea>
       <form onSubmit={sendMessage} className="border-t p-2 sm:p-4 relative bg-background">
         <div className="flex gap-2 items-center">
-          <label className="cursor-pointer">
-            <input
-              type="file"
-              className="hidden"
-              onChange={e => setFile(e.target.files?.[0] || null)}
-              disabled={isLoading}
-            />
-            <Paperclip className="h-5 w-5 sm:h-4 sm:w-4" />
-          </label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={e => setFile(e.target.files?.[0] || null)}
+                    disabled={isLoading}
+                  />
+                  <Paperclip className="h-5 w-5 sm:h-4 sm:w-4" />
+                </label>
+              </TooltipTrigger>
+              <TooltipContent>Attach file</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Input
             value={newMessage}
             onChange={handleInput}
@@ -424,13 +486,20 @@ export function ChatInterface() {
             disabled={isLoading}
             className="flex-1 text-sm sm:text-base"
           />
-          <Button type="submit" disabled={isLoading} size="lg" className="px-4 h-10 sm:h-11">
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="submit" disabled={isLoading} size="lg" className="px-4 h-10 sm:h-11">
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Send</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {file && (
             <span className="ml-2 text-xs text-muted-foreground truncate max-w-[80px]">{file.name}</span>
           )}

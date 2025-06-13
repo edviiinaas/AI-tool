@@ -20,6 +20,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, PlusCircle, KeyRound, Copy, Trash2, Eye, EyeOff } from "lucide-react"
 import { generateMockId } from "@/lib/utils"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ApiKey {
   id: string
@@ -147,22 +149,54 @@ export function ApiKeysSettingsForm() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {apiKeys.map((key) => (
+                  {isGenerating ? (
+                    Array(2).fill(0).map((_, i) => (
+                      <TableRow key={`skeleton-key-${i}`}>
+                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                      </TableRow>
+                    ))
+                  ) : apiKeys.map((key) => (
                     <TableRow key={key.id}>
                       <TableCell className="font-medium">{key.name}</TableCell>
                       <TableCell className="font-mono text-sm">{key.keyPrefix}</TableCell>
                       <TableCell>{new Date(key.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>{key.lastUsed ? new Date(key.lastUsed).toLocaleDateString() : "Never"}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive/80"
-                          onClick={() => setShowRevokeConfirm(key)}
-                          aria-label={`Revoke API key ${key.name}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <TableCell className="text-right flex gap-2 justify-end">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => copyToClipboard(key.keyPrefix)}
+                                aria-label={`Copy API key ${key.name}`}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Copy key prefix</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive/80"
+                                onClick={() => setShowRevokeConfirm(key)}
+                                aria-label={`Revoke API key ${key.name}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Revoke API key</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                     </TableRow>
                   ))}

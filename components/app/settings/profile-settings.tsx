@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
 import { AvatarUpload } from "./avatar-upload"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function ProfileSettings() {
   const { user, updateUserMetadata } = useAuth()
@@ -46,6 +48,24 @@ export function ProfileSettings() {
     }
   }
 
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Settings</CardTitle>
+          <CardDescription>Manage your personal information and preferences.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-24 w-24 rounded-full mb-6" />
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -54,7 +74,14 @@ export function ProfileSettings() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6">
-          <AvatarUpload />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span><AvatarUpload /></span>
+              </TooltipTrigger>
+              <TooltipContent>Change your profile picture</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="fullName">Full Name</Label>
@@ -80,10 +107,17 @@ export function ProfileSettings() {
           </div>
         </CardContent>
         <CardFooter className="border-t pt-6">
-          <Button type="submit" disabled={isSubmitting} className="ml-auto">
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Changes
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="submit" disabled={isSubmitting} className="ml-auto">
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Save your profile changes</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardFooter>
       </form>
     </Card>

@@ -5,6 +5,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription }
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function AppSettingsForm() {
   const [theme, setTheme] = useState("system")
@@ -17,6 +19,21 @@ export function AppSettingsForm() {
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsSubmitting(false)
     // Show a toast or feedback here if desired
+  }
+
+  if (isSubmitting) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>App Settings</CardTitle>
+          <CardDescription>Manage your app preferences like theme and language.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -54,9 +71,16 @@ export function AppSettingsForm() {
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleSave} disabled={isSubmitting} className="ml-auto">
-          {isSubmitting ? "Saving..." : "Save Changes"}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={handleSave} disabled={isSubmitting} className="ml-auto">
+                {isSubmitting ? "Saving..." : "Save Changes"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Save your app settings</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </CardFooter>
     </Card>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import WelcomeStep from "./steps/welcome-step"
 import { AgentSelectionStep } from "./steps/agent-selection-step"
 import { DocumentUploadStep } from "./steps/document-upload-step"
@@ -38,6 +38,22 @@ export default function OnboardingWizard() {
   const { toast } = useToast()
   const router = useRouter()
   const { addNotification } = useNotificationSystem()
+
+  // Restore onboarding progress from localStorage on mount
+  useEffect(() => {
+    const savedStep = localStorage.getItem("onboardingStep")
+    const savedData = localStorage.getItem("onboardingData")
+    if (savedStep) setCurrentStep(Number(savedStep))
+    if (savedData) setOnboardingData(JSON.parse(savedData))
+  }, [])
+
+  // Save onboarding progress to localStorage and Supabase on change
+  useEffect(() => {
+    localStorage.setItem("onboardingStep", String(currentStep))
+    localStorage.setItem("onboardingData", JSON.stringify(onboardingData))
+    // Save progress to Supabase user metadata (if logged in)
+    supabase.auth.updateUser({ data: { onboarding_step: currentStep, onboarding_data: onboardingData } })
+  }, [currentStep, onboardingData])
 
   const handleNext = async () => {
     if (currentStep === 1 && !onboardingData.companyName.trim()) {

@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Building } from "lucide-react"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function WorkspaceDetailsForm() {
   const { user, isLoading: authLoading, login } = useAuth() // Using login to 'refresh' user for mock
@@ -73,8 +75,10 @@ export function WorkspaceDetailsForm() {
           <CardTitle>Workspace Details</CardTitle>
           <CardDescription>Manage your workspace settings.</CardDescription>
         </CardHeader>
-        <CardContent className="flex justify-center items-center h-32">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <CardContent className="flex flex-col gap-4">
+          <Skeleton className="h-10 w-1/2" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-1/3" />
         </CardContent>
       </Card>
     )
@@ -91,9 +95,16 @@ export function WorkspaceDetailsForm() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-muted rounded-md">
-              <Building className="h-6 w-6 text-primary" />
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="p-2 bg-muted rounded-md">
+                    <Building className="h-6 w-6 text-primary" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Workspace icon</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <div className="flex-grow space-y-1.5">
               <Label htmlFor="workspaceName">Workspace Name</Label>
               <Input
@@ -112,10 +123,17 @@ export function WorkspaceDetailsForm() {
           </div>
         </CardContent>
         <CardFooter className="border-t pt-6">
-          <Button type="submit" disabled={isSubmitting} className="ml-auto">
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Changes
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="submit" disabled={isSubmitting} className="ml-auto">
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Save your workspace changes</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardFooter>
       </form>
     </Card>

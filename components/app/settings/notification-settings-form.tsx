@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { BellRing, AlertTriangle } from "lucide-react"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function NotificationSettingsForm() {
   const { preferences, updatePreference, requestDesktopPermission, desktopPermissionStatus } = useNotificationSystem()
@@ -14,6 +16,21 @@ export function NotificationSettingsForm() {
     if (channel === "inApp") return "In-App"
     if (channel === "desktop") return "Desktop"
     return channel.charAt(0).toUpperCase() + channel.slice(1)
+  }
+
+  if (!preferences || preferences.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Notification Settings</CardTitle>
+          <CardDescription>Manage how you receive notifications for different events.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -34,10 +51,17 @@ export function NotificationSettingsForm() {
                   : "Enable desktop notifications to receive real-time alerts even when the app is in the background."}
               </p>
               {desktopPermissionStatus === "default" && (
-                <Button onClick={requestDesktopPermission} size="sm" variant="outline">
-                  <BellRing className="mr-2 h-4 w-4" />
-                  Enable Desktop Notifications
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button onClick={requestDesktopPermission} size="sm" variant="outline">
+                        <BellRing className="mr-2 h-4 w-4" />
+                        Enable Desktop Notifications
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Enable browser desktop notifications</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </div>
           </div>
@@ -48,18 +72,25 @@ export function NotificationSettingsForm() {
             <h4 className="font-medium">{pref.label}</h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {pref.allowedChannels.map((channel) => (
-                <div key={channel} className="flex items-center space-x-2">
-                  <Switch
-                    id={`${pref.eventType}-${channel}`}
-                    checked={pref.enabledChannels.includes(channel)}
-                    onCheckedChange={(checked) => updatePreference(pref.eventType, channel, checked)}
-                    disabled={channel === "desktop" && desktopPermissionStatus !== "granted"}
-                  />
-                  <Label htmlFor={`${pref.eventType}-${channel}`} className="text-sm">
-                    {getChannelLabel(channel)}
-                    {channel === "desktop" && desktopPermissionStatus === "denied" && " (Blocked)"}
-                  </Label>
-                </div>
+                <TooltipProvider key={channel}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id={`${pref.eventType}-${channel}`}
+                          checked={pref.enabledChannels.includes(channel)}
+                          onCheckedChange={(checked) => updatePreference(pref.eventType, channel, checked)}
+                          disabled={channel === "desktop" && desktopPermissionStatus !== "granted"}
+                        />
+                        <Label htmlFor={`${pref.eventType}-${channel}`} className="text-sm">
+                          {getChannelLabel(channel)}
+                          {channel === "desktop" && desktopPermissionStatus === "denied" && " (Blocked)"}
+                        </Label>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Toggle {getChannelLabel(channel)} notifications</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </div>

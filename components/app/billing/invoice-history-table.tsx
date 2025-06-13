@@ -8,6 +8,7 @@ import { Download } from "lucide-react"
 import { mockInvoices } from "@/lib/mock-data"
 import type { Invoice } from "@/lib/types"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 interface InvoiceHistoryTableProps {
   isLoading?: boolean
@@ -71,13 +72,27 @@ export function InvoiceHistoryTable({ isLoading = false }: InvoiceHistoryTablePr
                   <TableCell className="font-medium">{invoice.date}</TableCell>
                   <TableCell>{invoice.amount}</TableCell>
                   <TableCell>
-                    <Badge variant={getStatusVariant(invoice.status) as any}>{invoice.status}</Badge>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant={getStatusVariant(invoice.status) as any}>{invoice.status}</Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Download invoice</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))
