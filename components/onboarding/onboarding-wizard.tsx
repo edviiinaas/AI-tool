@@ -11,6 +11,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
 
 const totalSteps = 5
 
@@ -33,7 +34,7 @@ export default function OnboardingWizard() {
   })
   const router = useRouter()
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === 1 && !onboardingData.companyName.trim()) {
       alert("Please enter your company name to proceed."); // Replace with toast in a real app
       return;
@@ -44,9 +45,12 @@ export default function OnboardingWizard() {
     } else {
       // Finish onboarding
       console.log("Onboarding complete:", onboardingData)
-      // Here you would typically save onboarding status for the user
-      // and update user's company name if it was collected.
-      router.push("/app/dashboard") // Redirect to the main app dashboard
+      // Set onboarding_completed in Supabase user metadata
+      await supabase.auth.updateUser({
+        data: { onboarding_completed: true, company_name: onboardingData.companyName }
+      })
+      // Redirect to the main app dashboard
+      router.push("/app/dashboard")
     }
   }
 

@@ -178,3 +178,18 @@ export interface Invoice {
   status: "paid" | "unpaid" | "overdue";
   // Add any other fields as needed
 }
+
+const mapSupabaseUserToAppUser = (supabaseUser: SupabaseUser | null): User | null => {
+  if (!supabaseUser) return null
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email || "",
+    fullName: supabaseUser.user_metadata?.full_name,
+    companyName: supabaseUser.user_metadata?.company_name,
+    plan: supabaseUser.user_metadata?.plan || "starter",
+    onboardingCompleted:
+      supabaseUser.user_metadata?.onboardingCompleted ??
+      supabaseUser.user_metadata?.onboarding_completed ??
+      false,
+  }
+}

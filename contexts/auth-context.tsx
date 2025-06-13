@@ -106,7 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fullName: supabaseUser.user_metadata?.full_name,
       companyName: supabaseUser.user_metadata?.company_name,
       plan: supabaseUser.user_metadata?.plan || "starter",
-      onboardingCompleted: supabaseUser.user_metadata?.onboarding_completed || false,
+      onboardingCompleted:
+        supabaseUser.user_metadata?.onboardingCompleted ??
+        supabaseUser.user_metadata?.onboarding_completed ??
+        false,
     }
   }
 
