@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { useToast } from "@/components/ui/use-toast"
 
 const totalSteps = 5
 
@@ -32,11 +33,13 @@ export default function OnboardingWizard() {
     firstMessageSent: false,
     teamInvitesSent: 0,
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
   const router = useRouter()
 
   const handleNext = async () => {
     if (currentStep === 1 && !onboardingData.companyName.trim()) {
-      alert("Please enter your company name to proceed."); // Replace with toast in a real app
+      toast({ title: "Missing Company Name", description: "Please enter your company name to proceed.", variant: "destructive" })
       return;
     }
 
@@ -44,13 +47,17 @@ export default function OnboardingWizard() {
       setCurrentStep(currentStep + 1)
     } else {
       // Finish onboarding
-      console.log("Onboarding complete:", onboardingData)
-      // Set onboarding_completed in Supabase user metadata
-      await supabase.auth.updateUser({
-        data: { onboarding_completed: true, company_name: onboardingData.companyName }
-      })
-      // Redirect to the main app dashboard
-      router.push("/app/dashboard")
+      setIsSubmitting(true)
+      try {
+        await supabase.auth.updateUser({
+          data: { onboarding_completed: true, company_name: onboardingData.companyName }
+        })
+        router.push("/app/dashboard")
+      } catch (error) {
+        toast({ title: "Onboarding Failed", description: "Could not complete onboarding. Please try again.", variant: "destructive" })
+      } finally {
+        setIsSubmitting(false)
+      }
     }
   }
 
@@ -117,15 +124,16 @@ export default function OnboardingWizard() {
         {currentStep === 5 && <InviteTeamStep onComplete={handleTeamInviteComplete} />}
       </CardContent>
       <CardFooter className="flex justify-between border-t pt-6">
-        <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
+        <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isSubmitting}>
           <ChevronLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <Button onClick={handleNext} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-          {currentStep === totalSteps ? "Finish Setup" : "Next Step"}
-          {currentStep === totalSteps ? (
-            <CheckCircle className="ml-2 h-4 w-4" />
+        <Button onClick={handleNext} className="bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <span className="flex items-center"><svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Processing...</span>
+          ) : currentStep === totalSteps ? (
+            <>Finish Setup<CheckCircle className="ml-2 h-4 w-4" /></>
           ) : (
-            <ChevronRight className="ml-2 h-4 w-4" />
+            <>Next Step<ChevronRight className="ml-2 h-4 w-4" /></>
           )}
         </Button>
       </CardFooter>
