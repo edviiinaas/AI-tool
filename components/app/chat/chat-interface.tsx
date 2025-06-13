@@ -348,14 +348,6 @@ export function ChatInterface() {
 
   return (
     <div className="flex h-[80vh] border rounded-lg overflow-hidden">
-      <ChatHistorySidebar
-        chats={chats}
-        selectedChatId={selectedChatId}
-        onSelectChat={selectChat}
-        onNewChat={() => user && createNewChat(user.id)}
-        onRenameChat={renameChat}
-        onDeleteChat={deleteChat}
-      />
       <main className="flex-1 flex flex-col">
         <div className="border-b p-4 flex items-center gap-2 justify-between">
           <div className="flex items-center gap-4">

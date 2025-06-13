@@ -49,7 +49,6 @@ const navigationLinks = [
   { href: "/app/billing", label: "Billing", icon: CreditCard },
   { href: "/app/agents", label: "Agent Configuration", icon: KeyRound },
   { href: "/app/settings", label: "User Settings", icon: Settings },
-  { href: "/app/workspace", label: "Workspace Settings", icon: Building },
 ]
 
 interface GlobalSearchDialogProps {

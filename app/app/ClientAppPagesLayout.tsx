@@ -4,7 +4,6 @@ import type React from "react"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { AppHeader } from "@/components/app/app-header"
-import { ConversationHistory } from "@/components/app/conversation-history"
 import { AgentPanel } from "@/components/app/agent-panel"
 import { HelpWidget } from "@/components/app/help-widget"
 import type { Conversation } from "@/lib/types" // Ensure Conversation is imported
@@ -76,7 +75,7 @@ export default function ClientAppPagesLayout({
               isConversationPanelOpen ? "w-72 md:w-80" : "w-0"
             } overflow-hidden border-r dark:border-zinc-700`}
           >
-            <ConversationHistory />
+            {/* <ConversationHistory /> */}
           </div>
         )}
         <main className="flex flex-1 flex-col gap-4 p-0 overflow-y-auto bg-background dark:bg-zinc-950">

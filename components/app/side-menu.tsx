@@ -55,11 +55,6 @@ export function SideMenu({ isOpen }: SideMenuProps) {
       icon: LifeBuoy,
     },
     {
-      title: "Workspace",
-      href: "/app/workspace",
-      icon: Briefcase,
-    },
-    {
       title: "Billing",
       href: "/app/billing",
       icon: CreditCard,

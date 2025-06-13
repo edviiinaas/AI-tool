@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { getAgentPresets, createAgentPreset, deleteAgentPreset } from '@/lib/supabaseAgentPresets'
 import { useAuth } from '@/contexts/auth-context'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const DEFAULT_PRESETS = [
   { name: "Cost Focus", agentIds: ["boq", "price"] },
@@ -29,6 +30,7 @@ export function AgentSelector({ isAdmin = false }: { isAdmin?: boolean }) {
   const [loading, setLoading] = useState(true)
   const [presets, setPresets] = useState<any[]>([])
   const [loadingPresets, setLoadingPresets] = useState(false)
+  const [showAgentModal, setShowAgentModal] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -122,6 +124,7 @@ export function AgentSelector({ isAdmin = false }: { isAdmin?: boolean }) {
           </span>
         ))}
         <button className="ml-2 px-2 py-1 border rounded" onClick={handleSavePreset}>+ Save Preset</button>
+        <button className="ml-2 px-2 py-1 border rounded bg-blue-100 text-blue-700" onClick={() => setShowAgentModal(true)}>Manage Agents</button>
       </div>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -207,6 +210,27 @@ export function AgentSelector({ isAdmin = false }: { isAdmin?: boolean }) {
       {isAdmin && !loading && (
         <button className="ml-2 px-2 py-1 border rounded" onClick={handleAdd}>+ Add Agent</button>
       )}
+      <Dialog open={showAgentModal} onOpenChange={setShowAgentModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Agents</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {agents.map((agent) => (
+              <div key={agent.id} className="flex items-center gap-2 border rounded p-2">
+                <span className="text-2xl">{agent.emoji}</span>
+                <div className="flex-1">
+                  <div className="font-medium">{agent.name}</div>
+                  <div className="text-xs text-gray-500">{agent.description}</div>
+                </div>
+                <button onClick={() => handleEdit(agent)} className="text-blue-500">✏️</button>
+                <button onClick={() => handleDelete(agent)} className="text-red-500">🗑️</button>
+              </div>
+            ))}
+          </div>
+          <button className="mt-4 px-2 py-1 border rounded bg-green-100 text-green-700" onClick={handleAdd}>+ Add Agent</button>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

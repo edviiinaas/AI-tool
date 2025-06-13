@@ -1,7 +1,6 @@
 "use client"
 
 import { WorkspaceDetailsForm } from "@/components/app/workspace/workspace-details-form"
-import { DangerZone } from "@/components/app/workspace/danger-zone"
 import { Separator } from "@/components/ui/separator"
 
 export default function WorkspaceSettingsPageClient() {
@@ -18,8 +17,6 @@ export default function WorkspaceSettingsPageClient() {
       <WorkspaceDetailsForm />
 
       <Separator />
-
-      <DangerZone />
     </div>
   )
 }
