@@ -39,7 +39,16 @@ const getNotificationIcon = (eventType: AppNotification["eventType"]): React.Ele
 }
 
 export function NotificationBell() {
-  const { notifications, markAsRead, markAllAsRead, unreadCount } = useNotificationSystem()
+  const { notifications, markAsRead, markAllAsRead, unreadCount, addNotification } = useNotificationSystem()
+
+  const handleTestNotification = () => {
+    addNotification({
+      title: "Test Notification",
+      description: "This is a test notification.",
+      eventType: "newFeature",
+      href: "/app/notifications"
+    })
+  }
 
   return (
     <DropdownMenu>
@@ -67,6 +76,9 @@ export function NotificationBell() {
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <Button variant="outline" size="sm" className="w-full mb-2" onClick={handleTestNotification}>
+          Send Test Notification
+        </Button>
         <ScrollArea className="h-[300px] md:h-[350px]">
           {notifications.length === 0 ? (
             <div className="text-center text-sm text-muted-foreground py-10">You have no new notifications.</div>
