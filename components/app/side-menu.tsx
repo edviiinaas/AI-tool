@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   Briefcase,
   CreditCard,
+  KeyRound,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -58,6 +59,11 @@ export function SideMenu({ isOpen }: SideMenuProps) {
       title: "Billing",
       href: "/app/billing",
       icon: CreditCard,
+    },
+    {
+      title: "Agents",
+      href: "/app/agents",
+      icon: KeyRound,
     },
   ]
 

@@ -115,125 +115,50 @@ export function AgentSelector({ isAdmin = false, onAgentSettings }: { isAdmin?: 
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2 items-center mb-2">
-        <span className="font-bold">Presets:</span>
-        {loadingPresets ? <span>Loading...</span> : presets.length === 0 ? <span className="text-gray-400">No presets</span> : presets.map(preset => (
-          <span key={preset.id} className="border rounded px-2 py-1 flex items-center gap-1 cursor-pointer bg-gray-50" onClick={() => setSelectedAgents(preset.agent_ids)}>
-            {preset.name}
-            <button className="ml-1 text-xs text-red-500" onClick={e => { e.stopPropagation(); handleDeletePreset(preset.id) }}>✕</button>
-          </span>
-        ))}
-        <button className="ml-2 px-2 py-1 border rounded" onClick={handleSavePreset}>+ Save Preset</button>
-        <button className="ml-2 px-2 py-1 border rounded bg-blue-100 text-blue-700" onClick={() => setShowAgentModal(true)}>Manage Agents</button>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium">Mode:</span>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">Single</span>
-            <Switch
-              checked={mode === 'multi'}
-              onCheckedChange={(checked) => setMode(checked ? 'multi' : 'single')}
-            />
-            <span className="text-sm">Multi</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-2 mb-2 overflow-x-auto">
-        {DEFAULT_PRESETS.map(preset => (
-          <button
-            key={preset.name}
-            className={`btn btn-sm whitespace-nowrap ${arraysEqual(selectedAgents, preset.agentIds) ? "bg-blue-500 text-white" : "bg-gray-100"}`}
-            onClick={() => setSelectedAgents(preset.agentIds)}
-          >
-            {preset.name}
-          </button>
-        ))}
-        {presets.map(preset => (
-          <button
-            key={preset.id}
-            className={`btn btn-sm whitespace-nowrap ${arraysEqual(selectedAgents, preset.agent_ids) ? "bg-blue-500 text-white" : "bg-gray-100"}`}
-            onClick={() => setSelectedAgents(preset.agent_ids)}
-          >
-            {preset.name}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 mb-2">
+        <span className="font-bold">Agents:</span>
         <button
-          className="btn btn-sm border-dashed whitespace-nowrap"
-          onClick={handleSavePreset}
+          className="ml-2 px-2 py-1 border rounded text-xs text-gray-500 hover:text-primary"
+          onClick={() => setSelectedAgents([])}
         >
-          + Save Current as Preset
+          Clear
         </button>
       </div>
-
-      <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-        <div className="flex w-max space-x-4 p-4">
-          {loading ? (
-            [...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 w-32 rounded-lg" />)
-          ) : agents.length === 0 ? (
-            <div className="p-4 text-gray-500">No agents available</div>
-          ) : (
-            agents.map((agent) => (
-              <TooltipProvider key={agent.id || ''}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => toggleAgent(agent.id)}
-                      className={cn(
-                        "flex flex-col items-center space-y-2 rounded-lg border p-4 transition-colors",
-                        selectedAgents.includes(agent.id)
-                          ? "ring-2 ring-primary"
-                          : "hover:bg-muted"
-                      )}
-                    >
-                      <span className="text-2xl">{agent.emoji || ''}</span>
-                      <span className="text-sm font-medium">{agent.name || ''}</span>
-                      {isAdmin && (
-                        <span className="ml-2">
-                          <button onClick={e => { e.stopPropagation(); handleEdit(agent) }}>✏️</button>
-                          <button onClick={e => { e.stopPropagation(); handleDelete(agent) }}>🗑️</button>
-                        </span>
-                      )}
-                      {onAgentSettings && (
-                        <button onClick={() => onAgentSettings(agent)} title="Agent Settings">⚙️</button>
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{agent.description}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ))
-          )}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-      {isAdmin && !loading && (
-        <button className="ml-2 px-2 py-1 border rounded" onClick={handleAdd}>+ Add Agent</button>
-      )}
-      <Dialog open={showAgentModal} onOpenChange={setShowAgentModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Manage Agents</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {agents.map((agent) => (
-              <div key={agent.id} className="flex items-center gap-2 border rounded p-2">
-                <span className="text-2xl">{agent.emoji}</span>
-                <div className="flex-1">
-                  <div className="font-medium">{agent.name}</div>
-                  <div className="text-xs text-gray-500">{agent.description}</div>
-                </div>
-                <button onClick={() => handleEdit(agent)} className="text-blue-500">✏️</button>
-                <button onClick={() => handleDelete(agent)} className="text-red-500">🗑️</button>
-              </div>
-            ))}
-          </div>
-          <button className="mt-4 px-2 py-1 border rounded bg-green-100 text-green-700" onClick={handleAdd}>+ Add Agent</button>
-        </DialogContent>
-      </Dialog>
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-300">
+        {agents.map((agent) => (
+          <TooltipProvider key={agent.id}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => toggleAgent(agent.id)}
+                  className={cn(
+                    "flex flex-col items-center justify-center min-w-[72px] px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-primary",
+                    selectedAgents.includes(agent.id)
+                      ? "bg-primary text-white border-primary shadow"
+                      : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
+                  )}
+                  style={{ minWidth: 72 }}
+                >
+                  <span className="text-2xl mb-1">{agent.emoji}</span>
+                  <span className="text-xs font-medium truncate max-w-[60px]">{agent.name}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="text-sm font-bold mb-1">{agent.name}</div>
+                <div className="text-xs text-gray-500 max-w-xs">{agent.description}</div>
+                {onAgentSettings && (
+                  <button
+                    className="mt-2 px-2 py-1 border rounded text-xs text-blue-600 hover:bg-blue-50"
+                    onClick={() => onAgentSettings(agent)}
+                  >
+                    Settings
+                  </button>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ))}
+      </div>
     </div>
   )
 } 

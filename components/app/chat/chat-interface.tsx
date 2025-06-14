@@ -20,6 +20,8 @@ import { ChatHistorySidebar } from "./chat-history-sidebar"
 import { Skeleton } from '@/components/ui/skeleton'
 import Papa from 'papaparse'
 import jsPDF from 'jspdf'
+import { MessageList } from 'react-chat-elements'
+import 'react-chat-elements/dist/main.css'
 
 const CONVERSATION_ID = "default-conv" // TODO: Use real conversation id per chat
 
@@ -60,6 +62,7 @@ export function ChatInterface() {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragActive, setDragActive] = useState(false)
+  const [showAgentManager, setShowAgentManager] = useState(false)
   
   const { chats, selectedChatId, loadChats, selectChat, createNewChat, renameChat, deleteChat, messages, addMessage, selectedAgents, loadMessages } = useChatStore()
 
@@ -351,6 +354,11 @@ export function ChatInterface() {
     alert(`Open settings for agent: ${agent.name}`);
   }, []);
 
+  const handleSaveAgentConfig = (agent: any, config: any) => {
+    // TODO: Implement save logic
+    console.log("Saving agent config:", agent, config);
+  };
+
   return (
     <div className="flex flex-col h-full min-h-0 w-full">
       <div className="flex items-center justify-between p-4 border-b">
@@ -361,20 +369,53 @@ export function ChatInterface() {
         >
           + New
         </button>
+        <button
+          className="ml-2 px-4 py-2 bg-secondary text-black rounded shadow hover:bg-secondary/90"
+        >
+          Manage Agents
+        </button>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <span>No messages yet</span>
-          </div>
-        ) : (
-          groupedMessages.map((group, i) => (
-            <div key={i}>{/* ... */}</div>
-          ))
-        )}
+        <MessageList
+          className="message-list"
+          lockable={true}
+          toBottomHeight={'100%'}
+          referance={scrollRef}
+          dataSource={messages.map((msg, idx) => ({
+            id: msg.id || idx,
+            position: msg.type === 'user' ? 'right' : 'left',
+            type: 'text',
+            text: msg.content,
+            date: msg.createdAt ? new Date(msg.createdAt) : new Date(),
+            title: msg.type === 'user' ? (user?.fullName || user?.email || '') : (msg.agentId || 'AI'),
+            focus: false,
+            titleColor: '',
+            forwarded: false,
+            replyButton: false,
+            removeButton: false,
+            status: 'sent',
+            notch: false,
+            retracted: false,
+            reply: null,
+            forwardedFrom: null,
+          }))}
+        />
       </div>
-      <form onSubmit={handleSendMessage} className="sticky bottom-0 bg-background p-4 border-t">
-        {/* ...input controls... */}
+      <form onSubmit={handleSendMessage} className="sticky bottom-0 bg-background p-4 border-t flex gap-2">
+        <input
+          className="flex-1 border rounded px-3 py-2"
+          placeholder="Type your message..."
+          value={newMessage}
+          onChange={e => setNewMessage(e.target.value)}
+          disabled={isLoading || selectedAgents.length === 0}
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 bg-primary text-white rounded shadow hover:bg-primary/90"
+          disabled={isLoading || selectedAgents.length === 0}
+        >
+          Send
+        </button>
       </form>
     </div>
   )
